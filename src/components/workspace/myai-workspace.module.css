@@ -1,0 +1,411 @@
+.screen {
+  min-height: 100svh;
+  background: #f4f1eb;
+  color: #171614;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.header {
+  min-height: 72px;
+  padding: 0 28px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid #d7d0c7;
+  background: rgba(250, 248, 244, .94);
+}
+
+.brand,
+.backLink,
+.localeLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.headerTitle {
+  text-align: center;
+}
+
+.headerTitle small {
+  display: block;
+  color: #8a8177;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.headerTitle b {
+  display: block;
+  margin-top: 3px;
+  font: 500 18px Georgia, 'Times New Roman', serif;
+}
+
+.headerActions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backLink,
+.localeLink,
+.exportButton,
+.runButton,
+.resetButton {
+  border: 1px solid #cfc7bd;
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.exportButton,
+.runButton,
+.resetButton {
+  cursor: pointer;
+}
+
+.exportButton {
+  border-color: #171614;
+  background: #171614;
+  color: #fff;
+}
+
+.workspaceGrid {
+  min-height: calc(100svh - 73px);
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr) 310px;
+}
+
+.fileTree,
+.fileTreeCompact {
+  min-width: 0;
+  background: #1b1a18;
+  color: #e9e3da;
+  overflow: auto;
+}
+
+.fileTree {
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+
+.fileTreeCompact {
+  width: 170px;
+  flex: 0 0 170px;
+  border-right: 1px solid rgba(255,255,255,.11);
+  background: #171715;
+}
+
+.treeHeader {
+  min-height: 52px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.treeHeader span {
+  font: 900 10px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: .12em;
+}
+
+.treeHeader small {
+  color: #807a73;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.treeLevel {
+  display: grid;
+}
+
+.folderRow,
+.fileRow,
+.fileRowActive {
+  width: 100%;
+  min-height: 31px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: #bdb6ad;
+  text-align: left;
+  font: 500 11px 'SFMono-Regular', Consolas, monospace;
+}
+
+.folderRow span,
+.fileRow span,
+.fileRowActive span {
+  color: #7f786f;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.folderRow b,
+.fileRow b,
+.fileRowActive b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.fileRow,
+.fileRowActive {
+  cursor: pointer;
+}
+
+.fileRow:disabled {
+  cursor: default;
+}
+
+.fileRow:not(:disabled):hover {
+  background: rgba(255,255,255,.05);
+  color: #f2ede6;
+}
+
+.fileRowActive {
+  background: #2d2b28;
+  color: #fff;
+  box-shadow: inset 2px 0 #e65c32;
+}
+
+.editorColumn {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(420px, 1fr) minmax(150px, auto) auto;
+  background: #11110f;
+  color: #eee8df;
+}
+
+.editorTopbar {
+  min-height: 51px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+
+.editorTopbar code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #a7a099;
+  font: 700 10px 'SFMono-Regular', Consolas, monospace;
+}
+
+.editorTopbar span {
+  margin-left: auto;
+  color: #6f6962;
+  font: 700 9px 'SFMono-Regular', Consolas, monospace;
+}
+
+.editorShell {
+  min-height: 420px;
+}
+
+.console {
+  max-height: 250px;
+  overflow: auto;
+  border-top: 1px solid rgba(255,255,255,.09);
+  background: #0d0d0c;
+}
+
+.consoleHeader {
+  min-height: 34px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  color: #858078;
+  font: 800 9px 'SFMono-Regular', Consolas, monospace;
+}
+
+.consoleEmpty,
+.console pre {
+  margin: 0;
+  padding: 12px 14px;
+  color: #aaa39b;
+  font: 500 11px/1.55 'SFMono-Regular', Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+.consoleError pre {
+  color: #f09b82;
+}
+
+.statusBar {
+  min-height: 28px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #24221f;
+  color: #8f8880;
+  font: 700 9px 'SFMono-Regular', Consolas, monospace;
+}
+
+.inspector {
+  padding: 24px;
+  border-left: 1px solid #d7d0c7;
+  background: #eee9e1;
+}
+
+.inspectorEyebrow {
+  margin: 0;
+  color: #d84c28;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.inspector h1 {
+  margin: 8px 0 0;
+  font: 500 34px/1 Georgia, 'Times New Roman', serif;
+}
+
+.inspectorText {
+  margin: 13px 0 0;
+  color: #5d554d;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.metricGrid div {
+  padding: 13px;
+  border: 1px solid #d3cbc0;
+  border-radius: 12px;
+  background: #f8f5ef;
+}
+
+.metricGrid b {
+  display: block;
+  font: 500 26px Georgia, 'Times New Roman', serif;
+}
+
+.metricGrid span {
+  color: #7d746a;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.actionStack {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.actionStack button {
+  width: 100%;
+}
+
+.runButton {
+  border-color: #d84c28;
+  background: #d84c28;
+  color: #fff;
+}
+
+.runButton:disabled,
+.resetButton:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.saveNote,
+.runtimeNote {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #e5dfd6;
+  color: #655d55;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.saveNote b,
+.runtimeNote b {
+  display: block;
+  margin-bottom: 3px;
+  color: #2d2925;
+}
+
+.inlineWorkspace {
+  min-height: 470px;
+  display: flex;
+  margin: 0 -32px -32px;
+}
+
+.inlineEditor {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  grid-template-rows: minmax(300px, 1fr) auto auto;
+}
+
+@media (max-width: 1050px) {
+  .workspaceGrid {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+
+  .inspector {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid #d7d0c7;
+  }
+}
+
+@media (max-width: 760px) {
+  .header {
+    padding: 10px 14px;
+    grid-template-columns: 1fr auto;
+  }
+
+  .headerTitle {
+    display: none;
+  }
+
+  .workspaceGrid {
+    display: block;
+  }
+
+  .fileTree {
+    max-height: 240px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .editorColumn {
+    min-height: 70svh;
+  }
+
+  .fileTreeCompact {
+    display: none;
+  }
+
+  .inlineWorkspace {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+}

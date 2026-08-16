@@ -131,7 +131,9 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
         <div className={styles.progressText}>{tr(locale, 'Путь к MyGPT', 'Path to MyGPT')} · {lesson.index + 1} / {starterLessons.length}</div>
         <div className={styles.headerActions}>
           <Link href={`/${alternateLocale}/journey/${lesson.slug}`} className={styles.localeLink}>{alternateLocale.toUpperCase()}</Link>
-          <div className={styles.projectState}><span>MyAI</span><b>{ready ? progress : 0}/{starterLessons.length}</b></div>
+          <Link href={`/${locale}/my-ai/`} className={styles.projectState} style={{color: 'inherit', textDecoration: 'none'}}>
+            <span>MyAI</span><b>{ready ? progress : 0}/{starterLessons.length}</b>
+          </Link>
         </div>
       </header>
 
