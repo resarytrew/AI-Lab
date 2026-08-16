@@ -5,6 +5,14 @@ import {useEffect, useRef, useState} from 'react';
 import {getChapterContent} from '@/content/chapter-content';
 import {localize, type StarterLessonId} from '@/content/learning-path';
 import {
+  ensureLessonModule,
+  lessonModulePath,
+  loadMyAiWorkspace,
+  persistMyAiWorkspace,
+  resetWorkspaceFile,
+  updateWorkspaceFile,
+} from '@/lib/myai-workspace';
+import {
   buildReferenceSource,
   PythonLabClient,
   type PythonRunResult,
@@ -34,6 +42,7 @@ function runtimeLabel(locale: string, state: PythonRuntimeState) {
 
 export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId; locale: string}) {
   const content = getChapterContent(lessonId);
+  const workspacePath = lessonModulePath(lessonId);
   const [visualIndex, setVisualIndex] = useState(0);
   const [workedVisible, setWorkedVisible] = useState(1);
   const [mode, setMode] = useState<DepthMode>('math');
@@ -48,10 +57,14 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
   const runtimeRef = useRef<PythonLabClient | null>(null);
 
   useEffect(() => {
-    setEditorCode(content.engineer.starterCode);
+    if (typeof window === 'undefined') return;
+    const current = loadMyAiWorkspace();
+    const workspace = ensureLessonModule(current, lessonId, content.engineer.starterCode);
+    if (workspace !== current) persistMyAiWorkspace(workspace);
+    setEditorCode(workspace.files[workspacePath]?.content ?? content.engineer.starterCode);
     setShowSolution(false);
     setRunResult(null);
-  }, [content.engineer.starterCode]);
+  }, [content.engineer.starterCode, lessonId, workspacePath]);
 
   useEffect(() => {
     if (
@@ -102,6 +115,27 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
 
   const activeVisual = content.visualNodes[visualIndex];
   const runtimeBusy = runtimeState === 'loading' || runtimeState === 'running';
+
+  function persistEditorCode(value: string) {
+    setEditorCode(value);
+    setRunResult(null);
+    if (typeof window === 'undefined') return;
+
+    const current = loadMyAiWorkspace();
+    const ensured = ensureLessonModule(current, lessonId, content.engineer.starterCode);
+    const next = updateWorkspaceFile(ensured, workspacePath, value);
+    if (next !== current) persistMyAiWorkspace(next);
+  }
+
+  function restoreStarterCode() {
+    if (typeof window === 'undefined') return;
+    const current = loadMyAiWorkspace();
+    const ensured = ensureLessonModule(current, lessonId, content.engineer.starterCode);
+    const next = resetWorkspaceFile(ensured, workspacePath);
+    if (next !== current) persistMyAiWorkspace(next);
+    setEditorCode(next.files[workspacePath]?.content ?? content.engineer.starterCode);
+    setRunResult(null);
+  }
 
   async function executePython(withTests: boolean) {
     const client = runtimeRef.current;
@@ -286,8 +320,8 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                 <div className={monacoStyles.editorInstruction}>
                   {tr(
                     locale,
-                    'Исправь код справа. Теперь это настоящий Python: ▶ Запустить выполняет файл в браузере, а Проверить тестами сравнивает поведение твоей программы с эталоном.',
-                    'Edit the code on the right. This is now real Python: ▶ Run executes the file in your browser, while Check tests compares your program behavior with the reference.',
+                    'Исправь код справа. Это файл твоего MyAI-проекта: изменения сохраняются автоматически и останутся после перехода к следующему уроку. ▶ Запустить выполняет настоящий Python, а Проверить тестами сравнивает поведение программы с эталоном.',
+                    'Edit the code on the right. This is a real file in your MyAI project: changes are autosaved and remain when you move to another lesson. ▶ Run executes real Python, while Check tests compares your program behavior with the reference.',
                   )}
                 </div>
 
@@ -304,15 +338,8 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                   <button type="button" disabled={runtimeBusy || runtimeState !== 'ready'} onClick={() => void executePython(true)}>
                     ✓ {tr(locale, 'Проверить тестами', 'Check tests')}
                   </button>
-                  <button
-                    type="button"
-                    className={chapterStyles.textButton}
-                    onClick={() => {
-                      setEditorCode(content.engineer.starterCode);
-                      setRunResult(null);
-                    }}
-                  >
-                    {tr(locale, 'Сбросить код', 'Reset code')}
+                  <button type="button" className={chapterStyles.textButton} onClick={restoreStarterCode}>
+                    {tr(locale, 'Сбросить файл', 'Reset file')}
                   </button>
                   {runtimeState === 'error' && (
                     <button type="button" className={chapterStyles.textButton} onClick={retryRuntime}>
@@ -327,7 +354,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                 {runResult?.tests.length ? (
                   <div className={runResult.testsPassed ? chapterStyles.correct : chapterStyles.incorrect}>
                     {runResult.testsPassed
-                      ? tr(locale, '✓ Все runtime-тесты прошли. Теперь объясни, почему код работает.', '✓ All runtime tests passed. Now explain why the code works.')
+                      ? tr(locale, '✓ Все runtime-тесты прошли. Файл сохранён в MyAI. Теперь объясни, почему код работает.', '✓ All runtime tests passed. The file is saved in MyAI. Now explain why the code works.')
                       : tr(locale, 'Не все тесты прошли. Посмотри результаты в консоли и исправь программу.', 'Some tests failed. Inspect the console results and fix the program.')}
                   </div>
                 ) : null}
@@ -337,20 +364,17 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
 
             <div className={chapterStyles.codeWindow}>
               <div>
-                <span /><span /><span /><b>my_ai/{lessonId}.py</b>
-                <strong className={monacoStyles.languageBadge}>Python</strong>
+                <span /><span /><span /><b>{workspacePath}</b>
+                <strong className={monacoStyles.languageBadge}>Python · autosave</strong>
               </div>
               <section className={monacoStyles.editorFrame}>
                 <Editor
                   height="100%"
                   language="python"
-                  path={`my_ai/${lessonId}.py`}
+                  path={workspacePath}
                   theme="vs-dark"
                   value={editorCode}
-                  onChange={(value) => {
-                    setEditorCode(value ?? '');
-                    setRunResult(null);
-                  }}
+                  onChange={(value) => persistEditorCode(value ?? '')}
                   loading={<div className={monacoStyles.editorLoading}>{tr(locale, 'Загружаем Monaco Editor…', 'Loading Monaco Editor…')}</div>}
                   options={{
                     automaticLayout: true,
@@ -385,7 +409,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                   <p className={monacoStyles.consoleEmpty}>
                     {runtimeState === 'loading'
                       ? tr(locale, 'Первый запуск загружает Python/WebAssembly. Следующие запуски будут быстрее.', 'The first run loads Python/WebAssembly. Later runs will be faster.')
-                      : tr(locale, 'Нажми ▶ Запустить, чтобы увидеть stdout, результат или traceback.', 'Press ▶ Run to see stdout, a result, or a traceback.')}
+                      : tr(locale, 'Файл уже автосохранён. Нажми ▶ Запустить, чтобы увидеть stdout, результат или traceback.', 'The file is already autosaved. Press ▶ Run to see stdout, a result, or a traceback.')}
                   </p>
                 )}
 
@@ -429,7 +453,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
               <footer className={monacoStyles.editorStatus}>
                 <span>Python</span>
                 <span>UTF-8</span>
-                <span>Spaces: 4</span>
+                <span>Autosave: MyAI</span>
                 <span>Monaco + Pyodide Worker</span>
               </footer>
             </div>
