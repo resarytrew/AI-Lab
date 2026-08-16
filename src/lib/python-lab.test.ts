@@ -1,4 +1,6 @@
 import {describe, expect, it} from 'vitest';
+import {chapterEnrichment} from '@/content/chapter-enrichment';
+import {starterLessons} from '@/content/learning-path';
 import {buildReferenceSource, resolvePythonWorkerUrl} from './python-lab';
 
 describe('python lab helpers', () => {
@@ -8,6 +10,14 @@ describe('python lab helpers', () => {
 
   it('keeps programs without an educational placeholder unchanged', () => {
     expect(buildReferenceSource('print("ready")', 'unused')).toBe('print("ready")');
+  });
+
+  it('builds a filled reference program for every starter Engineer challenge', () => {
+    for (const lesson of starterLessons) {
+      const engineer = chapterEnrichment[lesson.id].engineer;
+      expect(engineer.starterCode.match(/\.\.\./g), lesson.id).toHaveLength(1);
+      expect(buildReferenceSource(engineer.starterCode, engineer.expected), lesson.id).not.toContain('...');
+    }
   });
 
   it('resolves the worker under the GitHub Pages repository base path', () => {
