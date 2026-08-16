@@ -49,7 +49,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
           <span>{localize(content.visualCaption, locale)}</span>
         </div>
 
-        <div className={chapterStyles.visualTrack} role="group" aria-label={localize(content.visualTitle, locale)}>
+        <fieldset className={chapterStyles.visualTrack} aria-label={localize(content.visualTitle, locale)}>
           {content.visualNodes.map((node, index) => (
             <div className={chapterStyles.visualUnit} key={`${lessonId}-${node.label.en}`}>
               {index > 0 && <span className={chapterStyles.arrow}>→</span>}
@@ -63,7 +63,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
               </button>
             </div>
           ))}
-        </div>
+        </fieldset>
 
         {activeVisual && (
           <div className={chapterStyles.visualExplanation}>
