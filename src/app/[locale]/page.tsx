@@ -10,10 +10,10 @@ export default async function LocaleHome({
 
   return (
     <main style={{padding: '2rem', fontFamily: 'system-ui, sans-serif'}}>
-      <meta httpEquiv="refresh" content="0; url=./journey/human-knows-rule/" />
+      <meta httpEquiv="refresh" content="0; url=./journey/smart-machine/" />
       <p>
-        <a href="./journey/human-knows-rule/">
-          {locale === 'ru' ? 'Начать курс AI Lab с нуля' : 'Start AI Lab from zero'}
+        <a href="./journey/smart-machine/">
+          {locale === 'ru' ? 'Начать путь: что делает машину умной?' : 'Start the journey: what makes a machine intelligent?'}
         </a>
       </p>
     </main>
