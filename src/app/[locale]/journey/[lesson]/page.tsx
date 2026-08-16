@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
-import {StarterLessonPage} from '@/components/journey/starter-lesson';
+import {LabLessonPage} from '@/components/journey/lab-lesson';
 import {getStarterLesson, localize, starterLessons} from '@/content/learning-path';
 
 export const dynamicParams = false;
@@ -34,5 +34,5 @@ export default async function JourneyLessonRoute({
 
   if (!getStarterLesson(lessonSlug)) notFound();
 
-  return <StarterLessonPage locale={locale} lessonSlug={lessonSlug} />;
+  return <LabLessonPage locale={locale} lessonSlug={lessonSlug} />;
 }
