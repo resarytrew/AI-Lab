@@ -5,6 +5,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {getChapterContent} from '@/content/chapter-content';
 import {localize, type StarterLessonId} from '@/content/learning-path';
 import chapterStyles from './chapter-experience.module.css';
+import monacoStyles from './monaco-python-editor.module.css';
 
 type DepthMode = 'math' | 'engineer' | 'researcher';
 
@@ -174,7 +175,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
               <div className={chapterStyles.challengeCard}>
                 <small>{tr(locale, 'ТВОЯ ЗАДАЧА', 'YOUR TASK')}</small>
                 <p>{localize(content.engineer.challenge, locale)}</p>
-                <p className={chapterStyles.editorInstruction}>{tr(locale, 'Исправь код справа прямо в файле. Проверка читает содержимое Monaco Editor.', 'Edit the code directly in the file on the right. The check reads the Monaco Editor contents.')}</p>
+                <div className={monacoStyles.editorInstruction}>{tr(locale, 'Исправь код справа прямо в файле. Проверка читает содержимое Monaco Editor.', 'Edit the code directly in the file on the right. The check reads the Monaco Editor contents.')}</div>
                 <div className={chapterStyles.challengeActions}>
                   <button type="button" onClick={() => setCodeChecked(true)}>{tr(locale, 'Проверить код', 'Check code')}</button>
                   <button
@@ -195,13 +196,11 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
             </div>
 
             <div className={chapterStyles.codeWindow}>
-              <div className={chapterStyles.codeWindowHeader}>
-                <div className={chapterStyles.windowIdentity}>
-                  <span /><span /><span /><b>my_ai/{lessonId}.py</b>
-                </div>
-                <strong>Python</strong>
+              <div>
+                <span /><span /><span /><b>my_ai/{lessonId}.py</b>
+                <strong className={monacoStyles.languageBadge}>Python</strong>
               </div>
-              <div className={chapterStyles.editorFrame}>
+              <section className={monacoStyles.editorFrame}>
                 <Editor
                   height="100%"
                   language="python"
@@ -212,7 +211,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                     setEditorCode(value ?? '');
                     setCodeChecked(false);
                   }}
-                  loading={<div className={chapterStyles.editorLoading}>{tr(locale, 'Загружаем Monaco Editor…', 'Loading Monaco Editor…')}</div>}
+                  loading={<div className={monacoStyles.editorLoading}>{tr(locale, 'Загружаем Monaco Editor…', 'Loading Monaco Editor…')}</div>}
                   options={{
                     automaticLayout: true,
                     accessibilitySupport: 'auto',
@@ -234,13 +233,13 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                     wordWrap: 'on',
                   }}
                 />
-              </div>
-              <div className={chapterStyles.editorStatus}>
+              </section>
+              <footer className={monacoStyles.editorStatus}>
                 <span>Python</span>
                 <span>UTF-8</span>
                 <span>Spaces: 4</span>
                 <span>Monaco Editor</span>
-              </div>
+              </footer>
             </div>
           </div>
         )}
