@@ -376,7 +376,8 @@ export function createWorkspaceZipBytes(
 export function downloadMyAiWorkspace(workspace: MyAiWorkspace) {
   if (typeof window === 'undefined') return;
   const bytes = createWorkspaceZipBytes(workspace);
-  const blob = new Blob([bytes], {type: 'application/zip'});
+  const archive = Uint8Array.from(bytes);
+  const blob = new Blob([archive.buffer], {type: 'application/zip'});
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
