@@ -1,7 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
-import {getChapterEnrichment} from '@/content/chapter-enrichment';
+import {getChapterContent} from '@/content/chapter-content';
 import {localize, type StarterLessonId} from '@/content/learning-path';
 import chapterStyles from './chapter-experience.module.css';
 
@@ -19,7 +19,7 @@ function normalizeCode(value: string) {
 }
 
 export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId; locale: string}) {
-  const content = getChapterEnrichment(lessonId);
+  const content = getChapterContent(lessonId);
   const [visualIndex, setVisualIndex] = useState(0);
   const [workedVisible, setWorkedVisible] = useState(1);
   const [mode, setMode] = useState<DepthMode>('math');
