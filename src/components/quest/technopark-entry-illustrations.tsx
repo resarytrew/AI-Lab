@@ -1,193 +1,229 @@
-import type {ReactNode} from 'react';
-
 type IllustrationProps = {
   className?: string;
 };
 
-const artStyle = {
+const visualStyle = {
   width: '100%',
   height: 'auto',
   maxHeight: '72svh',
   overflow: 'visible',
 } as const;
 
-const inputNodes = [
-  {id: 'in-1', x: 389, y: 248},
-  {id: 'in-2', x: 389, y: 310},
-  {id: 'in-3', x: 389, y: 370},
+const networkInputs = [
+  {id: 'i1', x: 442, y: 238},
+  {id: 'i2', x: 442, y: 302},
+  {id: 'i3', x: 442, y: 366},
 ];
-const hiddenNodes = [
-  {id: 'hidden-1', x: 485, y: 221},
-  {id: 'hidden-2', x: 485, y: 286},
-  {id: 'hidden-3', x: 485, y: 352},
+const networkHidden = [
+  {id: 'h1', x: 536, y: 218},
+  {id: 'h2', x: 536, y: 280},
+  {id: 'h3', x: 536, y: 342},
+  {id: 'h4', x: 536, y: 404},
 ];
-const outputNodes = [
-  {id: 'out-1', x: 585, y: 262, fill: '#ef641f'},
-  {id: 'out-2', x: 585, y: 335, fill: '#ffb68a'},
-];
-const machineLinks = [
-  {id: 'calc', x: 414, y: 213},
-  {id: 'chess', x: 665, y: 210},
-  {id: 'voice', x: 414, y: 366},
-  {id: 'vacuum', x: 665, y: 363},
-  {id: 'chat', x: 545, y: 406},
-];
-const calculatorKeys = [
-  {id: 'k7', text: '7'}, {id: 'k8', text: '8'}, {id: 'k9', text: '9'}, {id: 'k-div', text: '÷'},
-  {id: 'k4', text: '4'}, {id: 'k5', text: '5'}, {id: 'k6', text: '6'}, {id: 'k-mul', text: '×'},
-  {id: 'k1', text: '1'}, {id: 'k2', text: '2'}, {id: 'k3', text: '3'}, {id: 'k-sub', text: '−'},
-  {id: 'k0', text: '0'}, {id: 'k-comma', text: ','}, {id: 'k-empty', text: ''}, {id: 'k-eq', text: '='},
+const networkOutputs = [
+  {id: 'o1', x: 636, y: 270},
+  {id: 'o2', x: 636, y: 352},
 ];
 
-function Student({x = 74, y = 190, scale = 1}: {x?: number; y?: number; scale?: number}) {
+function SceneDefs() {
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <ellipse cx="128" cy="315" rx="118" ry="18" fill="rgba(118,66,42,.12)" />
-      <path d="M66 148c10-43 41-70 82-67 42 4 69 36 68 79l-8 155H48l18-167Z" fill="#fffdfb" stroke="#714128" strokeWidth="3" />
-      <path d="M85 126c17-17 38-26 63-26 27 0 51 12 68 33l-18 21c-13-14-30-22-50-22-19 0-36 7-50 20Z" fill="#313745" />
-      <circle cx="149" cy="73" r="56" fill="#ffd9c1" stroke="#714128" strokeWidth="3" />
-      <path d="M95 63c7-42 37-66 75-61 30 4 53 24 59 52-35-10-77-6-134 9Z" fill="#5f351f" />
-      <path d="M199 125c19 25 25 56 16 89" fill="none" stroke="#714128" strokeWidth="3" strokeLinecap="round" />
-      <rect x="169" y="168" width="64" height="95" rx="9" fill="#343842" stroke="#1f2127" strokeWidth="3" transform="rotate(-10 201 215)" />
-      <circle cx="137" cy="74" r="4" fill="#5a3424" />
-      <circle cx="170" cy="73" r="4" fill="#5a3424" />
-      <path d="M143 96c9 8 18 8 27 0" fill="none" stroke="#5a3424" strokeWidth="2.5" strokeLinecap="round" />
+    <defs>
+      <linearGradient id="peachBlob" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#ffe8db" />
+        <stop offset="1" stopColor="#ffc9ad" />
+      </linearGradient>
+      <linearGradient id="orangeGlow" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#ff9b63" />
+        <stop offset="1" stopColor="#ef6326" />
+      </linearGradient>
+      <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">
+        <feDropShadow dx="0" dy="18" stdDeviation="18" floodColor="#5f3523" floodOpacity="0.14" />
+      </filter>
+      <filter id="smallShadow" x="-30%" y="-30%" width="160%" height="180%">
+        <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#5f3523" floodOpacity="0.1" />
+      </filter>
+    </defs>
+  );
+}
+
+function MainPanel({title = 'AI LAB / SYSTEM VIEW'}: {title?: string}) {
+  return (
+    <g filter="url(#softShadow)">
+      <rect x="285" y="108" width="470" height="386" rx="30" fill="#fffdfa" stroke="#7f4b35" strokeWidth="2.2" />
+      <rect x="307" y="132" width="426" height="338" rx="22" fill="#ffffff" stroke="#efd8cc" strokeWidth="1.4" />
+      <circle cx="332" cy="157" r="6" fill="#ef6b2f" />
+      <circle cx="353" cy="157" r="6" fill="#f6a37c" />
+      <circle cx="374" cy="157" r="6" fill="#e7d8d0" />
+      <text x="705" y="162" textAnchor="end" fontFamily="Arial, sans-serif" fontSize="11" fontWeight="700" fill="#8f7e75" letterSpacing="1.2">{title}</text>
     </g>
   );
 }
 
-function BrowserFrame({children}: {children: ReactNode}) {
+function FloatingCard({x, y, width, height, children}: {x: number; y: number; width: number; height: number; children: React.ReactNode}) {
+  return (
+    <g filter="url(#smallShadow)">
+      <rect x={x} y={y} width={width} height={height} rx="18" fill="#fffdfa" stroke="#efc9b6" strokeWidth="1.4" />
+      {children}
+    </g>
+  );
+}
+
+function NetworkDiagram() {
   return (
     <g>
-      <rect x="321" y="94" width="444" height="357" rx="30" fill="#fffdfb" stroke="#714128" strokeWidth="4" />
-      <rect x="339" y="115" width="408" height="315" rx="20" fill="#ffffff" stroke="#efc1a8" strokeWidth="2" />
-      <circle cx="363" cy="139" r="7" fill="#ef6f32" />
-      <circle cx="385" cy="139" r="7" fill="#f5a47b" />
-      <circle cx="407" cy="139" r="7" fill="#e8d5ca" />
-      {children}
-      <rect x="486" y="452" width="56" height="37" fill="#ee6b2c" />
-      <rect x="444" y="487" width="142" height="21" rx="10.5" fill="#313745" />
+      {networkInputs.flatMap((input) => networkHidden.map((hidden) => (
+        <line key={`${input.id}-${hidden.id}`} x1={input.x + 14} y1={input.y} x2={hidden.x - 16} y2={hidden.y} stroke="#8c5a43" strokeWidth="1.45" opacity="0.72" />
+      )))}
+      {networkHidden.flatMap((hidden) => networkOutputs.map((output) => (
+        <line key={`${hidden.id}-${output.id}`} x1={hidden.x + 16} y1={hidden.y} x2={output.x - 16} y2={output.y} stroke="#8c5a43" strokeWidth="1.45" opacity="0.72" />
+      )))}
+      {networkInputs.map((node) => <circle key={node.id} cx={node.x} cy={node.y} r="13" fill="#ffd7c2" stroke="#8c5a43" strokeWidth="1.8" />)}
+      {networkHidden.map((node) => <circle key={node.id} cx={node.x} cy={node.y} r="17" fill="#ff8f52" stroke="#8c4a2f" strokeWidth="1.8" />)}
+      {networkOutputs.map((node, index) => <circle key={node.id} cx={node.x} cy={node.y} r="16" fill={index === 0 ? '#ed5d1c' : '#ffb184'} stroke="#8c4a2f" strokeWidth="1.8" />)}
     </g>
   );
 }
 
 export function IntroIllustration({className}: IllustrationProps) {
   return (
-    <svg className={className} style={artStyle} viewBox="0 0 820 600" role="img" aria-label="Исследователь у интерактивного экрана AI Lab">
-      <path d="M123 461C68 346 113 183 246 104c134-79 355-50 452 62 86 100 72 243-31 330-102 87-474 80-544-35Z" fill="#f8d3bd" opacity=".83" />
-      <circle cx="690" cy="110" r="32" fill="#fff4ee" />
-      <path d="M715 76l33 8-8 35-33-8Z" fill="#f06c2f" stroke="#714128" strokeWidth="2.5" />
-      <Student />
-      <BrowserFrame>
-        <g stroke="#714128" strokeWidth="2.2">
-          {inputNodes.map(({id, x, y}) => <circle key={id} cx={x} cy={y} r="13" fill="#ffd4bb" />)}
-          {hiddenNodes.map(({id, x, y}) => <circle key={id} cx={x} cy={y} r="18" fill="#f58246" />)}
-          {outputNodes.map(({id, x, y, fill}) => <circle key={id} cx={x} cy={y} r="16" fill={fill} />)}
-          {inputNodes.flatMap(({id: inputId, y: y1}) => hiddenNodes.map(({id: hiddenId, y: y2}) => <line key={`${inputId}-${hiddenId}`} x1="402" y1={y1} x2="467" y2={y2} />))}
-          {hiddenNodes.flatMap(({id: hiddenId, y: y1}) => outputNodes.map(({id: outputId, y: y2}) => <line key={`${hiddenId}-${outputId}`} x1="503" y1={y1} x2="569" y2={y2} />))}
-        </g>
-        <rect x="626" y="210" width="84" height="82" rx="13" fill="#fff1e8" />
-        <rect x="640" y="225" width="53" height="9" rx="4.5" fill="#ee6b2c" />
-        <rect x="640" y="246" width="37" height="8" rx="4" fill="#f3a278" />
-        <rect x="626" y="309" width="84" height="72" rx="13" fill="#fff1e8" />
-        <path d="M641 360c14-32 29-15 42-35 7-11 12-7 18-17" fill="none" stroke="#ee6b2c" strokeWidth="5" strokeLinecap="round" />
-      </BrowserFrame>
-      <path d="M72 540h690" stroke="#714128" strokeWidth="3" strokeLinecap="round" />
+    <svg className={className} style={visualStyle} viewBox="0 0 820 610" role="img" aria-label="Премиальная визуализация лаборатории искусственного интеллекта">
+      <SceneDefs />
+      <path d="M147 490C88 367 117 209 248 116c126-89 355-85 471 18 104 93 111 246 13 351-105 111-510 119-585 5Z" fill="url(#peachBlob)" />
+      <circle cx="691" cy="145" r="34" fill="#fff7f2" opacity="0.82" />
+      <path d="M735 104l39 10-10 41-39-10Z" fill="url(#orangeGlow)" transform="rotate(12 754 126)" />
+      <MainPanel />
+      <NetworkDiagram />
+      <FloatingCard x={185} y={130} width={126} height={128}>
+        <rect x="205" y="151" width="86" height="86" rx="24" fill="#fff4ed" />
+        <path d="M226 187c0-16 12-28 28-28s28 12 28 28v12c0 16-12 28-28 28s-28-12-28-28Z" fill="#303642" />
+        <circle cx="243" cy="192" r="4" fill="#fff" />
+        <circle cx="265" cy="192" r="4" fill="#fff" />
+        <path d="M244 207c6 6 14 6 20 0" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M218 183v18M290 183v18M254 151v-12" stroke="#ef6b2f" strokeWidth="4" strokeLinecap="round" />
+        <circle cx="254" cy="135" r="7" fill="#ef6b2f" />
+      </FloatingCard>
+      <FloatingCard x={470} y={50} width={180} height={118}>
+        <text x="492" y="76" fontFamily="Arial, sans-serif" fontSize="11" fontWeight="700" fill="#9b8579" letterSpacing="1">SIGNAL / 01</text>
+        {[0, 1, 2, 3, 4].map((bar) => <rect key={`bar-${bar}`} x={494 + bar * 27} y={124 - bar * 11} width="14" height={25 + bar * 11} rx="5" fill={bar === 4 ? '#ef6326' : '#f58b55'} />)}
+        <path d="M488 139h140" stroke="#8a5a43" strokeWidth="1.4" />
+      </FloatingCard>
+      <FloatingCard x={655} y={286} width={120} height={116}>
+        <circle cx="715" cy="336" r="28" fill="#fff2e9" />
+        <path d="M707 312c8 4 15 9 20 17 5 10 5 22-2 32-4-8-10-13-18-17-7-4-16-6-25-5 4-13 12-22 25-27Z" fill="#ef6326" />
+        <circle cx="715" cy="336" r="11" fill="#fff" />
+      </FloatingCard>
+      <rect x="430" y="494" width="72" height="45" rx="4" fill="#ef6326" />
+      <rect x="384" y="536" width="164" height="20" rx="10" fill="#303642" />
     </svg>
   );
 }
 
-function MiniDevice({kind, x, y, label}: {kind: 'calc'|'chess'|'vacuum'|'voice'|'chat'; x: number; y: number; label: string}) {
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <rect x="-64" y="-54" width="128" height="108" rx="18" fill="#fff" stroke="#efb08c" strokeWidth="2" strokeDasharray="7 6" />
-      {kind === 'calc' && <><rect x="-22" y="-37" width="44" height="68" rx="6" fill="#fff" stroke="#714128" strokeWidth="3" /><rect x="-15" y="-27" width="30" height="12" rx="2" fill="#313745" />{['a','b','c'].flatMap((row, rowIndex) => ['a','b','c'].map((column, columnIndex) => <rect key={`${row}-${column}`} x={-13 + columnIndex * 10} y={-1 + rowIndex * 10} width="6" height="6" rx="1" fill="#e4b499" />))}</>}
-      {kind === 'chess' && <><path d="M-20 26h43l-6-10-5-27-17-19-14 9 8 10-14 19Z" fill="#ef6f32" stroke="#714128" strokeWidth="3" /><rect x="-25" y="26" width="50" height="8" rx="3" fill="#ffd0b4" stroke="#714128" strokeWidth="2" /></>}
-      {kind === 'vacuum' && <><ellipse cx="0" cy="5" rx="37" ry="26" fill="#fff" stroke="#714128" strokeWidth="3" /><ellipse cx="0" cy="-3" rx="22" ry="8" fill="#ffe0cd" stroke="#714128" strokeWidth="2" /><circle cx="0" cy="-5" r="4" fill="#ee6b2c" /></>}
-      {kind === 'voice' && <><rect x="-27" y="-35" width="54" height="67" rx="20" fill="#fff" stroke="#714128" strokeWidth="3" /><ellipse cx="0" cy="-28" rx="22" ry="7" fill="#ffd0b4" stroke="#714128" strokeWidth="2" /><path d="M-13 0v13M-5-7v28M4-2v19M12-11v32" stroke="#ee6b2c" strokeWidth="3" strokeLinecap="round" /></>}
-      {kind === 'chat' && <><path d="M-39-25h78a12 12 0 0 1 12 12v31a12 12 0 0 1-12 12H-4l-15 13 3-13h-23a12 12 0 0 1-12-12v-31a12 12 0 0 1 12-12Z" fill="#fff" stroke="#714128" strokeWidth="3" />{[-14, 0, 14].map(dx => <circle key={`dot-${dx}`} cx={dx} cy="2" r="5" fill="#ee6b2c" />)}</>}
-      <text x="0" y="72" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="700" fill="#302722">{label}</text>
-    </g>
-  );
-}
+const deviceTiles = [
+  {id: 'calculator', x: 351, y: 211, label: 'КАЛЬКУЛЯТОР', value: '123', accent: '#f7cdb8'},
+  {id: 'chess', x: 582, y: 211, label: 'ШАХМАТЫ', value: '8×8', accent: '#ffc09a'},
+  {id: 'voice', x: 351, y: 362, label: 'ГОЛОС', value: 'WAVE', accent: '#ffd7c3'},
+  {id: 'robot', x: 582, y: 362, label: 'РОБОТ', value: 'R-01', accent: '#ffc8aa'},
+];
 
 export function MachinesIllustration({className}: IllustrationProps) {
   return (
-    <svg className={className} style={artStyle} viewBox="0 0 820 600" role="img" aria-label="Карта умных устройств">
-      <path d="M132 466C70 339 124 176 258 99c130-75 337-45 430 63 84 97 69 237-30 323-98 84-456 83-526-19Z" fill="#f8d3bd" opacity=".82" />
-      <Student x={52} y={228} scale={0.88} />
-      <BrowserFrame>
-        <circle cx="545" cy="278" r="49" fill="#fff7f2" stroke="#efb08c" strokeWidth="2" />
-        <text x="545" y="298" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="56" fontWeight="800" fill="#ee6b2c">?</text>
-        <MiniDevice kind="calc" x={414} y={213} label="123" />
-        <MiniDevice kind="chess" x={665} y={210} label="8×8" />
-        <MiniDevice kind="voice" x={414} y={366} label="WAVE" />
-        <MiniDevice kind="vacuum" x={665} y={363} label="R-01" />
-        <MiniDevice kind="chat" x={545} y={406} label="TEXT" />
-        {machineLinks.map(({id, x, y}) => <path key={id} d={`M545 278L${x} ${y}`} stroke="#efad88" strokeWidth="2" strokeDasharray="6 7" />)}
-      </BrowserFrame>
-      <path d="M72 540h690" stroke="#714128" strokeWidth="3" strokeLinecap="round" />
+    <svg className={className} style={visualStyle} viewBox="0 0 820 610" role="img" aria-label="Система сравнения разных умных машин">
+      <SceneDefs />
+      <path d="M151 494C87 360 128 200 256 113c126-85 337-80 454 17 110 91 118 239 24 349-102 119-510 126-583 15Z" fill="url(#peachBlob)" />
+      <MainPanel title="SYSTEMS / COMPARISON" />
+      <circle cx="520" cy="314" r="53" fill="#fff8f3" stroke="#efb18e" strokeWidth="1.8" />
+      <text x="520" y="334" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="54" fontWeight="800" fill="#ef6326">?</text>
+      {deviceTiles.map((tile) => (
+        <g key={tile.id}>
+          <path d={`M520 314L${tile.x} ${tile.y}`} stroke="#efb18e" strokeWidth="1.5" strokeDasharray="6 7" />
+          <g filter="url(#smallShadow)">
+            <rect x={tile.x - 76} y={tile.y - 55} width="152" height="110" rx="18" fill="#fffdfa" stroke="#efc5af" strokeWidth="1.3" />
+            <rect x={tile.x - 52} y={tile.y - 33} width="104" height="55" rx="14" fill={tile.accent} opacity="0.55" />
+            <text x={tile.x} y={tile.y + 2} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="20" fontWeight="800" fill="#6f4431">{tile.value}</text>
+            <text x={tile.x} y={tile.y + 43} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="10" fontWeight="700" fill="#9e8274" letterSpacing="1.1">{tile.label}</text>
+          </g>
+        </g>
+      ))}
+      <FloatingCard x={435} y={442} width={170} height={92}>
+        <rect x="461" y="465" width="118" height="42" rx="13" fill="#fff2ea" />
+        <circle cx="490" cy="486" r="5" fill="#ef6326" />
+        <circle cx="520" cy="486" r="5" fill="#f18855" />
+        <circle cx="550" cy="486" r="5" fill="#f5b18c" />
+        <path d="M484 512l-16 13 4-18" fill="#fffdfa" stroke="#efc5af" strokeWidth="1.3" />
+      </FloatingCard>
     </svg>
   );
 }
+
+const speedBars = [
+  {id: 'human', label: 'ЧЕЛОВЕК', value: '45.210 сек', width: 188, y: 278, fill: '#f6c9b2'},
+  {id: 'machine', label: 'МАШИНА', value: '0.001 сек', width: 42, y: 374, fill: '#ef6326'},
+];
 
 export function SpeedIllustration({className}: IllustrationProps) {
   return (
-    <svg className={className} style={artStyle} viewBox="0 0 820 600" role="img" aria-label="Сравнение скорости человека и калькулятора">
-      <path d="M136 466C81 350 122 186 252 106c130-80 344-51 440 59 86 98 73 239-29 329-100 87-458 79-527-28Z" fill="#f8d3bd" opacity=".82" />
-      <Student x={50} y={222} scale={0.88} />
-      <rect x="330" y="91" width="318" height="420" rx="29" fill="#fffdfb" stroke="#714128" strokeWidth="4" />
-      <rect x="352" y="118" width="274" height="104" rx="15" fill="#fff1e8" stroke="#efb08c" strokeWidth="2" />
-      <text x="489" y="168" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="42" fontWeight="700" fill="#202020">0.001 сек</text>
-      <text x="489" y="198" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="16" fill="#5e554f">калькулятор</text>
-      {calculatorKeys.map(({id, text}, index) => {
-        const row = Math.floor(index / 4);
-        const column = index % 4;
-        return (
-          <g key={id}>
-            <rect x={366 + column * 63} y={246 + row * 62} width="49" height="48" rx="10" fill={column === 3 ? '#ee6b2c' : '#fff6f1'} stroke="#efc0a7" />
-            <text x={390.5 + column * 63} y={277 + row * 62} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="22" fill={column === 3 ? '#fff' : '#202020'}>{text}</text>
-          </g>
-        );
-      })}
-      <rect x="663" y="205" width="130" height="222" rx="20" fill="#fff" stroke="#714128" strokeWidth="3" />
-      <text x="681" y="246" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="700">Человек</text>
-      <text x="681" y="272" fontFamily="Arial, sans-serif" fontSize="18">45.210 сек</text>
-      <rect x="681" y="286" width="80" height="8" rx="4" fill="#f5b896" />
-      <path d="M680 315h95" stroke="#e6c4b2" strokeDasharray="5 5" />
-      <text x="681" y="350" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="700">Машина</text>
-      <text x="681" y="376" fontFamily="Arial, sans-serif" fontSize="18">0.001 сек</text>
-      <rect x="681" y="390" width="32" height="8" rx="4" fill="#ee6b2c" />
-      <path d="M72 540h690" stroke="#714128" strokeWidth="3" strokeLinecap="round" />
+    <svg className={className} style={visualStyle} viewBox="0 0 820 610" role="img" aria-label="Визуальное сравнение скорости человека и машины">
+      <SceneDefs />
+      <path d="M154 490C94 359 125 205 257 114c130-90 348-80 466 23 104 92 111 242 14 348-107 116-510 121-583 5Z" fill="url(#peachBlob)" />
+      <MainPanel title="BENCHMARK / SPEED" />
+      <text x="349" y="221" fontFamily="Arial, sans-serif" fontSize="13" fontWeight="700" fill="#a0877a" letterSpacing="1.4">987 × 654</text>
+      <text x="349" y="257" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="800" fill="#232323">645 498</text>
+      {speedBars.map((bar) => (
+        <g key={bar.id}>
+          <text x="349" y={bar.y - 16} fontFamily="Arial, sans-serif" fontSize="11" fontWeight="700" fill="#8e7b71" letterSpacing="1.1">{bar.label}</text>
+          <rect x="349" y={bar.y} width="238" height="18" rx="9" fill="#f5eee9" />
+          <rect x="349" y={bar.y} width={bar.width} height="18" rx="9" fill={bar.fill} />
+          <text x="608" y={bar.y + 14} fontFamily="Arial, sans-serif" fontSize="13" fontWeight="700" fill="#332d29">{bar.value}</text>
+        </g>
+      ))}
+      <FloatingCard x={602} y={176} width={118} height={116}>
+        <circle cx="661" cy="226" r="31" fill="#fff2ea" />
+        <path d="M661 204v22l18 10" fill="none" stroke="#ef6326" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="661" cy="226" r="4" fill="#ef6326" />
+        <text x="661" y="274" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="10" fontWeight="700" fill="#8e7b71" letterSpacing="1">TIME</text>
+      </FloatingCard>
+      <FloatingCard x={194} y={204} width={120} height={182}>
+        <text x="216" y="232" fontFamily="Arial, sans-serif" fontSize="10" fontWeight="700" fill="#9b8579" letterSpacing="1">CALC / 01</text>
+        <rect x="214" y="249" width="80" height="48" rx="10" fill="#313745" />
+        <text x="284" y="280" textAnchor="end" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="700" fill="#fff">0.001</text>
+        {[0, 1, 2].map((row) => [0, 1, 2].map((column) => <rect key={`key-${row}-${column}`} x={218 + column * 26} y={313 + row * 22} width="18" height="14" rx="4" fill={row === 2 && column === 2 ? '#ef6326' : '#f7d7c6'} />))}
+      </FloatingCard>
     </svg>
   );
 }
 
-export function AbilitiesIllustration({className}: IllustrationProps) {
-  const nodes = [
-    {id: 'memory', label: 'память', x: 375, y: 195},
-    {id: 'communication', label: 'общение', x: 627, y: 195},
-    {id: 'planning', label: 'планирование', x: 375, y: 405},
-    {id: 'learning', label: 'обучение', x: 627, y: 405},
-  ];
+const capabilityCards = [
+  {id: 'memory', x: 345, y: 220, title: 'ПАМЯТЬ', value: '01'},
+  {id: 'communication', x: 621, y: 220, title: 'ОБЩЕНИЕ', value: '02'},
+  {id: 'planning', x: 345, y: 392, title: 'ПЛАН', value: '03'},
+  {id: 'learning', x: 621, y: 392, title: 'ОБУЧЕНИЕ', value: '04'},
+];
 
+export function AbilitiesIllustration({className}: IllustrationProps) {
   return (
-    <svg className={className} style={artStyle} viewBox="0 0 820 600" role="img" aria-label="Карта способностей интеллекта">
-      <path d="M126 467C68 347 117 181 249 103c133-78 349-48 445 65 85 101 68 242-32 329-99 86-467 79-536-30Z" fill="#f8d3bd" opacity=".82" />
-      <Student x={562} y={247} scale={0.7} />
-      <rect x="252" y="84" width="430" height="410" rx="27" fill="#fffdfb" stroke="#714128" strokeWidth="4" />
-      <rect x="439" y="67" width="72" height="29" rx="8" fill="#ee6b2c" stroke="#714128" strokeWidth="2" />
-      <circle cx="503" cy="302" r="58" fill="#ffe1cf" stroke="#efaa82" strokeWidth="2" />
-      <path d="M478 298c-9-30 31-45 44-18 18-1 28 20 16 33 5 18-19 33-34 20-16 11-37-5-31-22-12-7-5-21 5-13Z" fill="#ffba92" stroke="#b9683c" strokeWidth="2" />
-      {nodes.map(({id, label, x, y}) => (
-        <g key={id}>
-          <path d={`M503 302L${x} ${y}`} stroke="#efaa82" strokeWidth="2" strokeDasharray="6 7" />
-          <rect x={x - 67} y={y - 53} width="134" height="106" rx="17" fill="#fff" stroke="#efaa82" strokeWidth="2" />
-          <circle cx={x} cy={y - 10} r="21" fill="#fff1e9" stroke="#ee6b2c" strokeWidth="2" />
-          <text x={x} y={y + 34} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="700" fill="#302722">{label}</text>
+    <svg className={className} style={visualStyle} viewBox="0 0 820 610" role="img" aria-label="Карта ключевых интеллектуальных способностей">
+      <SceneDefs />
+      <path d="M150 492C91 362 122 201 252 113c126-85 340-82 457 17 108 91 118 241 20 349-103 114-506 126-579 13Z" fill="url(#peachBlob)" />
+      <MainPanel title="INTELLIGENCE / MAP" />
+      <circle cx="483" cy="307" r="64" fill="#fff7f2" stroke="#efb28f" strokeWidth="1.8" />
+      <circle cx="483" cy="307" r="37" fill="#ffd7c1" />
+      <path d="M466 307c-9-22 18-39 36-24 20-3 30 21 16 34 8 19-17 34-31 20-18 8-35-10-25-25-8-2-7-13 4-5Z" fill="#ef6326" opacity="0.9" />
+      {capabilityCards.map((card) => (
+        <g key={card.id}>
+          <path d={`M483 307L${card.x} ${card.y}`} stroke="#e8a581" strokeWidth="1.5" strokeDasharray="6 7" />
+          <g filter="url(#smallShadow)">
+            <rect x={card.x - 78} y={card.y - 55} width="156" height="110" rx="18" fill="#fffdfa" stroke="#efc7b2" strokeWidth="1.3" />
+            <circle cx={card.x} cy={card.y - 10} r="22" fill="#fff0e7" />
+            <text x={card.x} y={card.y - 3} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="15" fontWeight="800" fill="#ef6326">{card.value}</text>
+            <text x={card.x} y={card.y + 36} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="10" fontWeight="700" fill="#8e786d" letterSpacing="1">{card.title}</text>
+          </g>
         </g>
       ))}
-      <path d="M72 540h690" stroke="#714128" strokeWidth="3" strokeLinecap="round" />
+      <FloatingCard x={640} y={86} width={120} height={90}>
+        <text x="661" y="113" fontFamily="Arial, sans-serif" fontSize="10" fontWeight="700" fill="#9b8579" letterSpacing="1">MODEL</text>
+        <rect x="661" y="130" width="72" height="10" rx="5" fill="#f6d6c6" />
+        <rect x="661" y="148" width="46" height="10" rx="5" fill="#ef6326" />
+      </FloatingCard>
     </svg>
   );
 }
