@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import styles from './technopark-entry-quest.module.css';
 import {
   getTechnoparkEntryCopy,
@@ -10,7 +10,6 @@ import {
 import {
   hasCoreAbilitySet,
   initialQuestProgress,
-  progressPercent,
   restoreQuestProgress,
   toggleInList,
   type IntelligenceAbility,
@@ -18,162 +17,204 @@ import {
 } from '@/lib/technopark-entry';
 
 const storageKey = 'ai-lab:quest:technopark-entry:v1';
+const sceneCount = 12;
 const deviceIds: DeviceId[] = ['calculator', 'chess', 'vacuum', 'voice', 'llm'];
+const stepNumbers = Array.from({length: sceneCount}, (_, index) => index + 1);
+const chessCells = Array.from({length: 36}, (_, index) => `chess-cell-${index + 1}`);
+const routeCells = [
+  {id: 'r-01', value: 'r'}, {id: 'r-02', value: ''}, {id: 'r-03', value: ''}, {id: 'r-04', value: 'x'}, {id: 'r-05', value: ''}, {id: 'r-06', value: ''},
+  {id: 'r-07', value: ''}, {id: 'r-08', value: 'x'}, {id: 'r-09', value: ''}, {id: 'r-10', value: ''}, {id: 'r-11', value: 'p'}, {id: 'r-12', value: ''},
+  {id: 'r-13', value: ''}, {id: 'r-14', value: 'x'}, {id: 'r-15', value: ''}, {id: 'r-16', value: ''}, {id: 'r-17', value: ''}, {id: 'r-18', value: ''},
+  {id: 'r-19', value: 'x'}, {id: 'r-20', value: ''}, {id: 'r-21', value: ''}, {id: 'r-22', value: 'l'}, {id: 'r-23', value: ''}, {id: 'r-24', value: ''},
+] as const;
 
-function MachineIcon({type}: {type: DeviceId}) {
-  const label =
-    type === 'calculator'
-      ? '±'
-      : type === 'chess'
-        ? '♞'
-        : type === 'vacuum'
-          ? '◉'
-          : type === 'voice'
-            ? '⌁'
-            : 'Aa';
-
+function Mark() {
   return (
-    <span className={styles.machineIcon} aria-hidden="true">
-      {label}
-    </span>
+    <div className={styles.mark} role="img" aria-label="AI Lab">
+      <span>A</span>
+      <small>LAB</small>
+    </div>
   );
 }
 
-function ChoiceButton({
-  selected,
-  children,
-  onClick,
+function SceneHeader({
+  scene,
+  locale,
+  questLabel,
+  languageLabel,
+  onBack,
 }: {
-  selected?: boolean;
-  children: React.ReactNode;
-  onClick: () => void;
+  scene: number;
+  locale: string;
+  questLabel: string;
+  languageLabel: string;
+  onBack: () => void;
 }) {
+  const targetLocale = locale === 'en' ? 'ru' : 'en';
+
   return (
-    <button
-      type="button"
-      className={`${styles.choice} ${selected ? styles.choiceSelected : ''}`}
-      onClick={onClick}
-    >
-      {children}
+    <header className={styles.chrome}>
+      <div className={styles.chromeLeft}>
+        <Mark />
+        <button
+          type="button"
+          className={styles.backButton}
+          onClick={onBack}
+          disabled={scene === 0}
+          aria-label="Назад"
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+      </div>
+
+      <div className={styles.questPill}>
+        <span className={styles.lock} aria-hidden="true" />
+        <span>{questLabel.replace(' · Вход в Технопарк', '')}</span>
+      </div>
+
+      <div className={styles.chromeRight}>
+        <Link className={styles.languageButton} href={`/${targetLocale}/technopark/entry`}>
+          {languageLabel}
+        </Link>
+        <div className={styles.profilePill}>
+          <span>Исследователь</span>
+          <i aria-hidden="true">↗</i>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function ProgressRail({scene}: {scene: number}) {
+  return (
+    <aside className={styles.progressRail} aria-label={`Шаг ${scene + 1} из ${sceneCount}`}>
+      <span className={styles.railArrow} aria-hidden="true">⌃</span>
+      <div className={styles.railSteps}>
+        {stepNumbers.map((step) => {
+          const index = step - 1;
+          return (
+            <span
+              key={`quest-step-${step}`}
+              className={`${styles.railStep} ${index === scene ? styles.railStepCurrent : ''} ${index < scene ? styles.railStepDone : ''}`}
+            >
+              {step}
+            </span>
+          );
+        })}
+      </div>
+      <span className={styles.railArrow} aria-hidden="true">⌄</span>
+    </aside>
+  );
+}
+
+function HelpButton() {
+  return (
+    <button type="button" className={styles.helpButton} title="Подсказка появится в нужный момент">
+      Помощь
     </button>
   );
 }
 
-function Feedback({good, children}: {good: boolean; children: React.ReactNode}) {
+function BottomAction({label, disabled, onClick}: {label: string; disabled?: boolean; onClick: () => void}) {
   return (
-    <div
-      className={`${styles.feedback} ${good ? styles.feedbackGood : styles.feedbackTry}`}
-      aria-live="polite"
-    >
-      <b>{good ? '✓' : '↺'}</b>
+    <div className={styles.bottomAction}>
+      <button type="button" disabled={disabled} onClick={onClick}>{label}</button>
+    </div>
+  );
+}
+
+function Feedback({good, children}: {good: boolean; children: ReactNode}) {
+  return (
+    <div className={`${styles.feedback} ${good ? styles.feedbackGood : styles.feedbackBad}`} aria-live="polite">
+      <b>{good ? 'Верно' : 'Попробуй ещё'}</b>
       <span>{children}</span>
     </div>
   );
 }
 
-function BottomNav({
-  backLabel,
-  nextLabel,
-  nextDisabled,
-  onBack,
-  onNext,
-}: {
-  backLabel: string;
-  nextLabel: string;
-  nextDisabled?: boolean;
-  onBack: () => void;
-  onNext: () => void;
-}) {
+function ChoiceList({answers, selected, onSelect}: {answers: readonly string[]; selected: number | null; onSelect: (index: number) => void}) {
   return (
-    <div className={styles.bottomNav}>
-      <button type="button" className={styles.secondary} onClick={onBack}>
-        {backLabel}
-      </button>
-      <button
-        type="button"
-        className={styles.primary}
-        disabled={nextDisabled}
-        onClick={onNext}
-      >
-        {nextLabel}
-        <span>→</span>
-      </button>
+    <div className={styles.choiceList}>
+      {answers.map((answer, index) => (
+        <button
+          key={answer}
+          type="button"
+          className={`${styles.choiceRow} ${selected === index ? styles.choiceRowSelected : ''}`}
+          onClick={() => onSelect(index)}
+        >
+          <span className={styles.choiceMarker}>{String.fromCharCode(65 + index)}</span>
+          <span>{answer}</span>
+        </button>
+      ))}
     </div>
   );
 }
 
-function QuestionCard({
-  question,
-  answers,
-  selected,
-  correctIndex,
-  good,
-  bad,
-  backLabel,
-  nextLabel,
-  onSelect,
-  onBack,
-  onNext,
-}: {
+function QuestionPanel({question, answers, selected, correctIndex, good, bad, onSelect}: {
   question: string;
   answers: readonly string[];
   selected: number | null;
   correctIndex: number;
   good: string;
   bad: string;
-  backLabel: string;
-  nextLabel: string;
   onSelect: (index: number) => void;
-  onBack: () => void;
-  onNext: () => void;
 }) {
   const correct = selected === correctIndex;
-
   return (
-    <div className={styles.questionCard}>
+    <div className={styles.questionPanel}>
       <h2>{question}</h2>
-      {answers.map((answer, index) => (
-        <ChoiceButton
-          key={answer}
-          selected={selected === index}
-          onClick={() => onSelect(index)}
-        >
-          {answer}
-        </ChoiceButton>
-      ))}
+      <ChoiceList answers={answers} selected={selected} onSelect={onSelect} />
       {selected !== null && <Feedback good={correct}>{correct ? good : bad}</Feedback>}
-      <BottomNav
-        backLabel={backLabel}
-        nextLabel={nextLabel}
-        nextDisabled={!correct}
-        onBack={onBack}
-        onNext={onNext}
-      />
     </div>
   );
 }
 
-function TechnoparkArt() {
+function LabSceneArt() {
   return (
-    <div className={styles.parkArt} aria-hidden="true">
-      <div className={styles.parkMoon} />
-      <div className={styles.parkTower}>
-        <span>AI</span>
+    <div className={styles.labSceneArt} aria-hidden="true">
+      <div className={styles.labBackdrop} />
+      <div className={styles.labWindow}><i /><i /><i /><i /></div>
+      <div className={styles.labDesk} />
+      <div className={styles.labMonitor}>
+        <div className={styles.monitorTopLine} />
+        <div className={styles.monitorRows}><i /><i /><i /></div>
+        <div className={styles.monitorGraph}><i /><i /><i /><i /></div>
       </div>
-      <div className={`${styles.parkBuilding} ${styles.parkBuildingLeft}`}>
-        <i />
-        <i />
-        <i />
+      <div className={styles.labKeyboard} />
+      <div className={styles.labNotebook}>01</div>
+      <div className={styles.labShelf}><i /><i /><i /></div>
+      <div className={styles.labPerson}>
+        <div className={styles.personHead} />
+        <div className={styles.personHair} />
+        <div className={styles.personBody} />
+        <div className={styles.personTablet} />
       </div>
-      <div className={`${styles.parkBuilding} ${styles.parkBuildingRight}`}>
-        <i />
-        <i />
-      </div>
-      <div className={styles.parkBridge} />
-      <div className={styles.parkPath} />
-      <div className={styles.parkGlowOne} />
-      <div className={styles.parkGlowTwo} />
     </div>
+  );
+}
+
+function DeviceSymbol({id}: {id: DeviceId}) {
+  const symbol: Record<DeviceId, string> = {
+    calculator: '123',
+    chess: '8×8',
+    vacuum: 'R-01',
+    voice: 'WAVE',
+    llm: 'TEXT',
+  };
+  return <span className={styles.deviceSymbol}>{symbol[id]}</span>;
+}
+
+function SceneLayout({kicker, title, lead, children, visual}: {kicker: string; title: string; lead: string; children?: ReactNode; visual?: ReactNode}) {
+  return (
+    <section className={styles.sceneLayout}>
+      <div className={styles.sceneCopy}>
+        <p className={styles.kicker}>{kicker}</p>
+        <h1>{title}</h1>
+        <p className={styles.lead}>{lead}</p>
+        {children}
+      </div>
+      <div className={styles.sceneVisual}>{visual}</div>
+    </section>
   );
 }
 
@@ -195,53 +236,33 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
   }, []);
 
   useEffect(() => {
-    if (hydrated) {
-      window.localStorage.setItem(storageKey, JSON.stringify(progress));
-    }
+    if (hydrated) window.localStorage.setItem(storageKey, JSON.stringify(progress));
   }, [hydrated, progress]);
 
   const scene = progress.scene;
-  const percent = progressPercent(scene);
-  const targetLocale = locale === 'en' ? 'ru' : 'en';
-  const setScene = (value: number) =>
-    setProgress((current) => ({
-      ...current,
-      scene: Math.max(0, Math.min(11, value)),
-    }));
+  const setScene = (value: number) => setProgress((current) => ({...current, scene: Math.max(0, Math.min(sceneCount - 1, value))}));
   const next = () => setScene(scene + 1);
   const back = () => setScene(scene - 1);
 
-  const sceneBody = (() => {
-    if (scene === 0) {
-      return (
-        <section className={`${styles.scene} ${styles.introScene}`}>
-          <div className={styles.introCopy}>
-            <p className={styles.eyebrow}>{copy.intro.eyebrow}</p>
-            <h1>{copy.intro.title}</h1>
-            <p className={styles.lead}>{copy.intro.lead}</p>
-            <div className={styles.missionNote}>
-              <b>01</b>
-              <span>{copy.intro.note}</span>
-            </div>
-            <button className={styles.primary} type="button" onClick={next}>
-              {copy.intro.action}
-              <span>→</span>
-            </button>
-          </div>
-          <TechnoparkArt />
-        </section>
-      );
-    }
+  let nextLabel = scene === 0 ? copy.intro.action : copy.next;
+  let nextDisabled = false;
+  let sceneBody: ReactNode;
 
-    if (scene === 1) {
-      return (
-        <section className={styles.scene}>
-          <div className={styles.centerHead}>
-            <p className={styles.eyebrow}>{copy.machines.eyebrow}</p>
-            <h1>{copy.machines.title}</h1>
-            <p className={styles.lead}>{copy.machines.lead}</p>
-          </div>
-          <div className={styles.machineGrid}>
+  if (scene === 0) {
+    sceneBody = (
+      <SceneLayout kicker="Первый день в AI Lab" title="Вход в Технопарк: что делает машину умной?" lead={copy.intro.lead} visual={<LabSceneArt />}>
+        <div className={styles.storyCard}><strong>Задача</strong><p>{copy.intro.note}</p></div>
+      </SceneLayout>
+    );
+  } else if (scene === 1) {
+    nextDisabled = progress.smartSystems.length === 0;
+    sceneBody = (
+      <SceneLayout
+        kicker={copy.machines.eyebrow}
+        title={copy.machines.title}
+        lead={copy.machines.lead}
+        visual={
+          <div className={styles.deviceWall}>
             {deviceIds.map((id) => {
               const selected = progress.smartSystems.includes(id);
               return (
@@ -249,387 +270,187 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
                   key={id}
                   type="button"
                   aria-pressed={selected}
-                  className={`${styles.machineCard} ${selected ? styles.machineCardSelected : ''}`}
-                  onClick={() =>
-                    setProgress((current) => ({
-                      ...current,
-                      smartSystems: toggleInList(current.smartSystems, id),
-                    }))
-                  }
+                  className={`${styles.deviceCard} ${selected ? styles.deviceCardSelected : ''}`}
+                  onClick={() => setProgress((current) => ({...current, smartSystems: toggleInList(current.smartSystems, id)}))}
                 >
-                  <MachineIcon type={id} />
-                  <strong>{copy.machines.devices[id]}</strong>
-                  <span>{selected ? '✓' : '+'}</span>
+                  <DeviceSymbol id={id} />
+                  <span>{copy.machines.devices[id]}</span>
+                  <i>{selected ? 'Выбрано' : 'Выбрать'}</i>
                 </button>
               );
             })}
           </div>
-          <p className={styles.microcopy}>
-            {progress.smartSystems.length ? copy.machines.reveal : copy.machines.hint}
-          </p>
-          <BottomNav
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            nextDisabled={!progress.smartSystems.length}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 2) {
-      return (
-        <section className={`${styles.scene} ${styles.twoColumn}`}>
-          <div>
-            <p className={styles.eyebrow}>{copy.speed.eyebrow}</p>
-            <h1>{copy.speed.title}</h1>
-            <p className={styles.lead}>{copy.speed.lead}</p>
-            <div className={styles.numberRace}>
-              <div><small>human</small><strong>987 × 654</strong><span>thinking…</span></div>
-              <div className={styles.vs}>VS</div>
-              <div><small>calculator</small><strong>645 498</strong><span>0.001 s</span></div>
-            </div>
-          </div>
-          <QuestionCard
-            question={copy.speed.question}
-            answers={copy.speed.answers}
-            selected={speedAnswer}
-            correctIndex={1}
-            good={copy.speed.good}
-            bad={copy.speed.bad}
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            onSelect={setSpeedAnswer}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 3) {
-      const abilities = Object.keys(copy.abilities.names) as IntelligenceAbility[];
-      const ready = hasCoreAbilitySet(progress.abilities);
-      return (
-        <section className={styles.scene}>
-          <div className={styles.centerHead}>
-            <p className={styles.eyebrow}>{copy.abilities.eyebrow}</p>
-            <h1>{copy.abilities.title}</h1>
-            <p className={styles.lead}>{copy.abilities.lead}</p>
-          </div>
-          <div className={styles.abilityOrbit}>
-            <div className={styles.orbitCenter}><strong>?</strong><span>intelligence</span></div>
-            {abilities.map((ability) => {
-              const selected = progress.abilities.includes(ability);
-              return (
-                <button
-                  key={ability}
-                  type="button"
-                  aria-pressed={selected}
-                  className={`${styles.abilityChip} ${selected ? styles.abilityChipSelected : ''}`}
-                  onClick={() =>
-                    setProgress((current) => ({
-                      ...current,
-                      abilities: toggleInList(current.abilities, ability),
-                    }))
-                  }
-                >
-                  {copy.abilities.names[ability]}
-                </button>
-              );
-            })}
-          </div>
-          <p className={styles.microcopy}>
-            {ready ? copy.abilities.reveal : `${copy.abilities.hint} · ${progress.abilities.length}/4`}
-          </p>
-          <BottomNav
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            nextDisabled={!ready}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 4) {
-      return (
-        <section className={`${styles.scene} ${styles.twoColumn}`}>
-          <div>
-            <p className={styles.eyebrow}>{copy.narrow.eyebrow}</p>
-            <h1>{copy.narrow.title}</h1>
-            <p className={styles.lead}>{copy.narrow.lead}</p>
-            <div className={styles.specialistPanel}>
-              <div className={styles.chessBoard}>♜ ♞ ♝<br />♟ ♟ ♟<br />· · ♔</div>
-              <div><strong>CHESS-01</strong><span>rating: superhuman</span><span>outside task: unknown</span></div>
-            </div>
-          </div>
-          <QuestionCard
-            question={copy.narrow.question}
-            answers={copy.narrow.answers}
-            selected={narrowAnswer}
-            correctIndex={1}
-            good={copy.narrow.good}
-            bad={copy.narrow.bad}
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            onSelect={setNarrowAnswer}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 5) {
-      return (
-        <section className={`${styles.scene} ${styles.twoColumn}`}>
-          <div>
-            <p className={styles.eyebrow}>{copy.rules.eyebrow}</p>
-            <h1>{copy.rules.title}</h1>
-            <p className={styles.lead}>{copy.rules.lead}</p>
-            <div className={styles.ruleStack}>
-              {copy.rules.rules.map((rule) => <code key={rule}>{rule}</code>)}
-              <div className={styles.unknownRule}>?</div>
-            </div>
-          </div>
-          <QuestionCard
-            question={copy.rules.question}
-            answers={copy.rules.answers}
-            selected={ruleAnswer}
-            correctIndex={1}
-            good={copy.rules.good}
-            bad={copy.rules.bad}
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            onSelect={setRuleAnswer}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 6) {
-      const correct = patternAnswer.trim() === copy.pattern.answer;
-      return (
-        <section className={`${styles.scene} ${styles.patternScene}`}>
-          <div className={styles.centerHead}>
-            <p className={styles.eyebrow}>{copy.pattern.eyebrow}</p>
-            <h1>{copy.pattern.title}</h1>
-            <p className={styles.lead}>{copy.pattern.lead}</p>
-          </div>
-          <div className={styles.patternRow}>
-            <span>2 <b>→</b> 4</span><span>3 <b>→</b> 6</span><span>5 <b>→</b> 10</span>
-            <span className={styles.patternQuestion}>
-              8 <b>→</b>
-              <input
-                aria-label={copy.pattern.question}
-                inputMode="numeric"
-                value={patternAnswer}
-                onChange={(event) => setPatternAnswer(event.target.value)}
-              />
-            </span>
-          </div>
-          {patternAnswer && <Feedback good={correct}>{correct ? copy.pattern.good : copy.pattern.bad}</Feedback>}
-          {correct && <div className={styles.discoveryCard}><span>DISCOVERY</span><p>{copy.pattern.reveal}</p></div>}
-          <BottomNav
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            nextDisabled={!correct}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 7) {
-      return (
-        <section className={`${styles.scene} ${styles.twoColumn}`}>
-          <div>
-            <p className={styles.eyebrow}>{copy.context.eyebrow}</p>
-            <h1>{copy.context.title}</h1>
-            <p className={styles.lead}>{copy.context.lead}</p>
-            <div className={styles.contextCards}>
-              {copy.context.phrases.map((phrase) => <blockquote key={phrase}>{phrase}</blockquote>)}
-            </div>
-          </div>
-          <QuestionCard
-            question={copy.context.question}
-            answers={copy.context.answers}
-            selected={contextAnswer}
-            correctIndex={1}
-            good={copy.context.good}
-            bad={copy.context.bad}
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            onSelect={setContextAnswer}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 8) {
-      return (
-        <section className={`${styles.scene} ${styles.twoColumn}`}>
-          <div>
-            <p className={styles.eyebrow}>{copy.plan.eyebrow}</p>
-            <h1>{copy.plan.title}</h1>
-            <p className={styles.lead}>{copy.plan.lead}</p>
-            <div className={styles.mapMini}>
-              <span className={styles.robotDot}>R</span>
-              <span className={styles.goalDot}>LAB</span>
-              <i className={styles.wallOne} />
-              <i className={styles.wallTwo} />
-              <svg viewBox="0 0 400 220" aria-hidden="true"><path d="M65 165 C120 130 120 55 200 65 S280 165 335 75" /></svg>
-            </div>
-          </div>
-          <QuestionCard
-            question={copy.plan.question}
-            answers={copy.plan.answers}
-            selected={planAnswer}
-            correctIndex={1}
-            good={copy.plan.good}
-            bad={copy.plan.bad}
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            onSelect={setPlanAnswer}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 9) {
-      return (
-        <section className={`${styles.scene} ${styles.twoColumn}`}>
-          <div>
-            <p className={styles.eyebrow}>{copy.transfer.eyebrow}</p>
-            <h1>{copy.transfer.title}</h1>
-            <p className={styles.lead}>{copy.transfer.lead}</p>
-            <div className={styles.thermostats}>
-              {copy.transfer.systems.map((system, index) => (
-                <article key={system}>
-                  <b>{index === 0 ? 'A' : 'B'}</b>
-                  <span>{index === 0 ? '07:00 → 22°' : 'observations → adaptation'}</span>
-                  <p>{system}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-          <QuestionCard
-            question={copy.transfer.question}
-            answers={copy.transfer.answers}
-            selected={transferAnswer}
-            correctIndex={1}
-            good={copy.transfer.good}
-            bad={copy.transfer.bad}
-            backLabel={copy.back}
-            nextLabel={copy.next}
-            onSelect={setTransferAnswer}
-            onBack={back}
-            onNext={next}
-          />
-        </section>
-      );
-    }
-
-    if (scene === 10) {
-      const ready = progress.journal.trim().length >= 12;
-      return (
-        <section className={`${styles.scene} ${styles.journalScene}`}>
-          <div className={styles.journalPaper}>
-            <p className={styles.eyebrow}>{copy.journal.eyebrow}</p>
-            <h1>{copy.journal.title}</h1>
-            <p className={styles.lead}>{copy.journal.lead}</p>
-            <label htmlFor="research-journal">{copy.journal.prompt}</label>
-            <textarea
-              id="research-journal"
-              maxLength={500}
-              value={progress.journal}
-              placeholder={copy.journal.placeholder}
-              onChange={(event) =>
-                setProgress((current) => ({...current, journal: event.target.value}))
-              }
-            />
-            <div className={styles.journalMeta}>
-              <span>{copy.journal.hint}</span>
-              <b>{progress.journal.length}/500</b>
-            </div>
-            <BottomNav
-              backLabel={copy.back}
-              nextLabel={copy.continue}
-              nextDisabled={!ready}
-              onBack={back}
-              onNext={next}
-            />
-          </div>
-          <div className={styles.journalStamp}>AI LAB<br />ENTRY 01</div>
-        </section>
-      );
-    }
-
-    return (
-      <section className={`${styles.scene} ${styles.unlockScene}`}>
-        <div className={styles.unlockHalo}><span>01</span></div>
-        <div className={styles.unlockCopy}>
-          <p className={styles.eyebrow}>{copy.unlock.eyebrow}</p>
-          <h1>{copy.unlock.title}</h1>
-          <p className={styles.lead}>{copy.unlock.lead}</p>
-          <div className={styles.badge}>{copy.unlock.badge}</div>
-          <div className={styles.unlockGrid}>
-            <article><small>JOURNAL</small><strong>{copy.unlock.journal}</strong><p>“{progress.journal}”</p></article>
-            <article><small>MYAI · M-01</small><strong>{copy.unlock.project}</strong><p>{copy.unlock.status}</p></article>
-            <article><small>NEXT</small><strong>{copy.unlock.open1}</strong><p>{copy.unlock.open2}</p></article>
-          </div>
-          <button
-            type="button"
-            className={styles.primary}
-            onClick={() =>
-              setProgress((current) => ({...current, scene: 0, completed: true}))
-            }
-          >
-            {copy.unlock.finish}
-            <span>↻</span>
-          </button>
-        </div>
-      </section>
+        }
+      >
+        <p className={styles.hintText}>{progress.smartSystems.length ? copy.machines.reveal : copy.machines.hint}</p>
+      </SceneLayout>
     );
-  })();
+  } else if (scene === 2) {
+    const correct = speedAnswer === 1;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.speed.eyebrow} title={copy.speed.title} lead={copy.speed.lead} visual={
+        <div className={styles.raceBoard}>
+          <div><small>Человек</small><b>987 × 654</b><span>думает...</span></div>
+          <i>VS</i>
+          <div><small>Калькулятор</small><b>645 498</b><span>0,001 с</span></div>
+        </div>
+      }>
+        <QuestionPanel question={copy.speed.question} answers={copy.speed.answers} selected={speedAnswer} correctIndex={1} good={copy.speed.good} bad={copy.speed.bad} onSelect={setSpeedAnswer} />
+      </SceneLayout>
+    );
+  } else if (scene === 3) {
+    const abilities = Object.keys(copy.abilities.names) as IntelligenceAbility[];
+    const ready = hasCoreAbilitySet(progress.abilities);
+    nextDisabled = !ready;
+    sceneBody = (
+      <SceneLayout kicker={copy.abilities.eyebrow} title={copy.abilities.title} lead={copy.abilities.lead} visual={
+        <div className={styles.abilityBoard}>
+          {abilities.map((ability) => {
+            const selected = progress.abilities.includes(ability);
+            return (
+              <button
+                key={ability}
+                type="button"
+                aria-pressed={selected}
+                className={`${styles.abilityCard} ${selected ? styles.abilityCardSelected : ''}`}
+                onClick={() => setProgress((current) => ({...current, abilities: toggleInList(current.abilities, ability)}))}
+              >
+                <span>{copy.abilities.names[ability]}</span><i>{selected ? '✓' : '+'}</i>
+              </button>
+            );
+          })}
+        </div>
+      }>
+        <p className={styles.hintText}>{ready ? copy.abilities.reveal : `${copy.abilities.hint} ${progress.abilities.length}/4`}</p>
+      </SceneLayout>
+    );
+  } else if (scene === 4) {
+    const correct = narrowAnswer === 1;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.narrow.eyebrow} title={copy.narrow.title} lead={copy.narrow.lead} visual={
+        <div className={styles.specialistBoard}>
+          <div className={styles.chessGrid}>{chessCells.map((cellId) => <i key={cellId} />)}</div>
+          <div className={styles.specialistStats}><small>СИСТЕМА CHESS-01</small><b>Сверхсильная в шахматах</b><span>Другие задачи: не обучена</span></div>
+        </div>
+      }>
+        <QuestionPanel question={copy.narrow.question} answers={copy.narrow.answers} selected={narrowAnswer} correctIndex={1} good={copy.narrow.good} bad={copy.narrow.bad} onSelect={setNarrowAnswer} />
+      </SceneLayout>
+    );
+  } else if (scene === 5) {
+    const correct = ruleAnswer === 1;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.rules.eyebrow} title={copy.rules.title} lead={copy.rules.lead} visual={
+        <div className={styles.rulesBoard}>
+          {copy.rules.rules.map((rule, index) => <div key={rule}><b>{String(index + 1).padStart(2, '0')}</b><code>{rule}</code></div>)}
+          <div className={styles.unknownCase}><b>04</b><code>НОВЫЙ СЛУЧАЙ → ?</code></div>
+        </div>
+      }>
+        <QuestionPanel question={copy.rules.question} answers={copy.rules.answers} selected={ruleAnswer} correctIndex={1} good={copy.rules.good} bad={copy.rules.bad} onSelect={setRuleAnswer} />
+      </SceneLayout>
+    );
+  } else if (scene === 6) {
+    const correct = patternAnswer.trim() === copy.pattern.answer;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.pattern.eyebrow} title={copy.pattern.title} lead={copy.pattern.lead} visual={
+        <div className={styles.patternBoard}>
+          <span>2 <b>→</b> 4</span><span>3 <b>→</b> 6</span><span>5 <b>→</b> 10</span>
+          <label><strong>8 →</strong><input aria-label={copy.pattern.question} inputMode="numeric" value={patternAnswer} onChange={(event) => setPatternAnswer(event.target.value)} /></label>
+        </div>
+      }>
+        {patternAnswer && <Feedback good={correct}>{correct ? copy.pattern.good : copy.pattern.bad}</Feedback>}
+        {correct && <div className={styles.discovery}><b>Открытие</b><p>{copy.pattern.reveal}</p></div>}
+      </SceneLayout>
+    );
+  } else if (scene === 7) {
+    const correct = contextAnswer === 1;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.context.eyebrow} title={copy.context.title} lead={copy.context.lead} visual={
+        <div className={styles.contextBoard}>
+          {copy.context.phrases.map((phrase, index) => <blockquote key={phrase}><small>Сцена {index + 1}</small><p>{phrase}</p></blockquote>)}
+        </div>
+      }>
+        <QuestionPanel question={copy.context.question} answers={copy.context.answers} selected={contextAnswer} correctIndex={1} good={copy.context.good} bad={copy.context.bad} onSelect={setContextAnswer} />
+      </SceneLayout>
+    );
+  } else if (scene === 8) {
+    const correct = planAnswer === 1;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.plan.eyebrow} title={copy.plan.title} lead={copy.plan.lead} visual={
+        <div className={styles.routeBoard}>
+          {routeCells.map(({id, value}) => (
+            <i key={id} className={`${value === 'x' ? styles.routeWall : ''} ${value === 'p' ? styles.routePath : ''} ${value === 'r' ? styles.routeRobot : ''} ${value === 'l' ? styles.routeLab : ''}`}>
+              {value === 'r' ? 'R' : value === 'l' ? 'LAB' : ''}
+            </i>
+          ))}
+        </div>
+      }>
+        <QuestionPanel question={copy.plan.question} answers={copy.plan.answers} selected={planAnswer} correctIndex={1} good={copy.plan.good} bad={copy.plan.bad} onSelect={setPlanAnswer} />
+      </SceneLayout>
+    );
+  } else if (scene === 9) {
+    const correct = transferAnswer === 1;
+    nextDisabled = !correct;
+    sceneBody = (
+      <SceneLayout kicker={copy.transfer.eyebrow} title={copy.transfer.title} lead={copy.transfer.lead} visual={
+        <div className={styles.thermostatBoard}>
+          {copy.transfer.systems.map((system, index) => (
+            <article key={system}><b>{index === 0 ? 'A' : 'B'}</b><div className={styles.thermostatDial}>{index === 0 ? '22°' : 'AUTO'}</div><p>{system}</p></article>
+          ))}
+        </div>
+      }>
+        <QuestionPanel question={copy.transfer.question} answers={copy.transfer.answers} selected={transferAnswer} correctIndex={1} good={copy.transfer.good} bad={copy.transfer.bad} onSelect={setTransferAnswer} />
+      </SceneLayout>
+    );
+  } else if (scene === 10) {
+    const ready = progress.journal.trim().length >= 12;
+    nextDisabled = !ready;
+    nextLabel = copy.continue;
+    sceneBody = (
+      <SceneLayout kicker={copy.journal.eyebrow} title={copy.journal.title} lead={copy.journal.lead} visual={
+        <div className={styles.journalPanel}>
+          <label htmlFor="research-journal">{copy.journal.prompt}</label>
+          <textarea id="research-journal" maxLength={500} value={progress.journal} placeholder={copy.journal.placeholder} onChange={(event) => setProgress((current) => ({...current, journal: event.target.value}))} />
+          <div><span>{copy.journal.hint}</span><b>{progress.journal.length}/500</b></div>
+        </div>
+      } />
+    );
+  } else {
+    nextLabel = copy.unlock.finish;
+    sceneBody = (
+      <SceneLayout kicker={copy.unlock.eyebrow} title={copy.unlock.title} lead={copy.unlock.lead} visual={
+        <div className={styles.unlockBoard}>
+          <div className={styles.unlockSeal}>01</div>
+          <article><small>Журнал</small><b>{copy.unlock.journal}</b><p>«{progress.journal}»</p></article>
+          <article><small>Проект M-01</small><b>{copy.unlock.project}</b><p>{copy.unlock.status}</p></article>
+          <article><small>Доступ</small><b>{copy.unlock.open1}</b><p>{copy.unlock.open2}</p></article>
+        </div>
+      }>
+        <div className={styles.passBadge}>{copy.unlock.badge}</div>
+      </SceneLayout>
+    );
+  }
+
+  const handleNext = () => {
+    if (scene === sceneCount - 1) {
+      setProgress((current) => ({...current, scene: 0, completed: true}));
+      return;
+    }
+    next();
+  };
 
   return (
     <main className={styles.questRoot}>
-      <header className={styles.questHeader}>
-        <div className={styles.brandMark}><span>AI</span><b>LAB</b></div>
-        <div className={styles.questMeta}><small>{copy.lab}</small><strong>{copy.quest}</strong></div>
-        <div
-          className={styles.progressWrap}
-          role="progressbar"
-          aria-label={copy.quest}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={percent}
-        >
-          <span>{String(scene + 1).padStart(2, '0')}</span>
-          <div><i style={{width: `${percent}%`}} /></div>
-          <span>12</span>
-        </div>
-        <Link className={styles.localeButton} href={`/${targetLocale}/technopark/entry`}>
-          {copy.language}
-        </Link>
-      </header>
+      <SceneHeader scene={scene} locale={locale} questLabel={copy.quest} languageLabel={copy.language} onBack={back} />
       {sceneBody}
-      {scene > 0 && scene < 11 && (
-        <button type="button" className={styles.cornerBack} onClick={back} aria-label={copy.back}>
-          ←
-        </button>
-      )}
+      <ProgressRail scene={scene} />
+      <BottomAction label={nextLabel} disabled={nextDisabled} onClick={handleNext} />
+      <HelpButton />
     </main>
   );
 }
