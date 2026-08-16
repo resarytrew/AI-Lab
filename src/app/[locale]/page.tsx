@@ -14,12 +14,6 @@ export default async function LocaleHome({
         httpEquiv="refresh"
         content="0; url=./learn/foundations/first-neuron/"
       />
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "window.location.replace('./learn/foundations/first-neuron/');",
-        }}
-      />
       <p>
         <a href="./learn/foundations/first-neuron/">
           {locale === 'ru' ? 'Открыть первый урок' : 'Open the first lesson'}
