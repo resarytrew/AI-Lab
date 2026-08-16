@@ -110,11 +110,11 @@ export function FirstNeuronLesson() {
           <button className="bookmark" type="button">♡ {t('lesson.bookmark')}</button>
         </div>
 
-        <div className="stepper" role="group" aria-label={t('lesson.steps')}>
-          <div className="step done"><span>✓</span>{t('lesson.predict')}</div>
-          <div className="step active"><span>2</span>{t('lesson.explore')}</div>
-          <div className="step"><span>3</span>{t('lesson.code')}</div>
-        </div>
+        <ol className="stepper" aria-label={t('lesson.steps')}>
+          <li className="step done"><span>✓</span>{t('lesson.predict')}</li>
+          <li className="step active"><span>2</span>{t('lesson.explore')}</li>
+          <li className="step"><span>3</span>{t('lesson.code')}</li>
+        </ol>
 
         <div className="learning-grid">
           <article className="panel playground-panel">
