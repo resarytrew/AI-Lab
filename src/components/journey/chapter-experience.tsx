@@ -1,9 +1,11 @@
 'use client';
 
-import {useMemo, useState} from 'react';
+import Editor from '@monaco-editor/react';
+import {useEffect, useMemo, useState} from 'react';
 import {getChapterContent} from '@/content/chapter-content';
 import {localize, type StarterLessonId} from '@/content/learning-path';
 import chapterStyles from './chapter-experience.module.css';
+import monacoStyles from './monaco-python-editor.module.css';
 
 type DepthMode = 'math' | 'engineer' | 'researcher';
 
@@ -24,19 +26,25 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
   const [workedVisible, setWorkedVisible] = useState(1);
   const [mode, setMode] = useState<DepthMode>('math');
   const [mathVisible, setMathVisible] = useState(1);
-  const [codeAnswer, setCodeAnswer] = useState('');
+  const [editorCode, setEditorCode] = useState(content.engineer.starterCode);
   const [codeChecked, setCodeChecked] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [hypothesis, setHypothesis] = useState<number | null>(null);
   const [experimentRan, setExperimentRan] = useState(false);
 
+  useEffect(() => {
+    setEditorCode(content.engineer.starterCode);
+    setCodeChecked(false);
+    setShowSolution(false);
+  }, [content.engineer.starterCode]);
+
   const codeCorrect = useMemo(() => {
     if (!codeChecked) return false;
-    const answer = normalizeCode(codeAnswer);
+    const source = normalizeCode(editorCode);
     const expected = normalizeCode(content.engineer.expected);
     const solution = normalizeCode(content.engineer.solution);
-    return answer === expected || answer === solution || solution.includes(answer) && answer.length > 5;
-  }, [codeAnswer, codeChecked, content.engineer.expected, content.engineer.solution]);
+    return source.includes(expected) || source.includes(solution);
+  }, [editorCode, codeChecked, content.engineer.expected, content.engineer.solution]);
 
   const activeVisual = content.visualNodes[visualIndex];
 
@@ -167,14 +175,19 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
               <div className={chapterStyles.challengeCard}>
                 <small>{tr(locale, 'ТВОЯ ЗАДАЧА', 'YOUR TASK')}</small>
                 <p>{localize(content.engineer.challenge, locale)}</p>
-                <input
-                  value={codeAnswer}
-                  onChange={(event) => {setCodeAnswer(event.target.value); setCodeChecked(false);}}
-                  placeholder={tr(locale, 'Введи только пропущенное выражение…', 'Enter only the missing expression…')}
-                  aria-label={tr(locale, 'Ответ на Code-задачу', 'Code challenge answer')}
-                />
+                <div className={monacoStyles.editorInstruction}>{tr(locale, 'Исправь код справа прямо в файле. Проверка читает содержимое Monaco Editor.', 'Edit the code directly in the file on the right. The check reads the Monaco Editor contents.')}</div>
                 <div className={chapterStyles.challengeActions}>
-                  <button type="button" onClick={() => setCodeChecked(true)}>{tr(locale, 'Проверить', 'Check')}</button>
+                  <button type="button" onClick={() => setCodeChecked(true)}>{tr(locale, 'Проверить код', 'Check code')}</button>
+                  <button
+                    type="button"
+                    className={chapterStyles.textButton}
+                    onClick={() => {
+                      setEditorCode(content.engineer.starterCode);
+                      setCodeChecked(false);
+                    }}
+                  >
+                    {tr(locale, 'Сбросить', 'Reset')}
+                  </button>
                   <button type="button" className={chapterStyles.textButton} onClick={() => setShowSolution((value) => !value)}>{showSolution ? tr(locale, 'Скрыть решение', 'Hide solution') : tr(locale, 'Показать решение', 'Show solution')}</button>
                 </div>
                 {codeChecked && <div className={codeCorrect ? chapterStyles.correct : chapterStyles.incorrect}>{codeCorrect ? tr(locale, '✓ Рабочий вариант. Объясни теперь каждую часть строки.', '✓ Working answer. Now explain every part of the line.') : localize(content.engineer.hint, locale)}</div>}
@@ -183,8 +196,50 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
             </div>
 
             <div className={chapterStyles.codeWindow}>
-              <div><span /><span /><span /><b>my_ai/{lessonId}.py</b></div>
-              <pre><code>{content.engineer.starterCode}</code></pre>
+              <div>
+                <span /><span /><span /><b>my_ai/{lessonId}.py</b>
+                <strong className={monacoStyles.languageBadge}>Python</strong>
+              </div>
+              <section className={monacoStyles.editorFrame}>
+                <Editor
+                  height="100%"
+                  language="python"
+                  path={`my_ai/${lessonId}.py`}
+                  theme="vs-dark"
+                  value={editorCode}
+                  onChange={(value) => {
+                    setEditorCode(value ?? '');
+                    setCodeChecked(false);
+                  }}
+                  loading={<div className={monacoStyles.editorLoading}>{tr(locale, 'Загружаем Monaco Editor…', 'Loading Monaco Editor…')}</div>}
+                  options={{
+                    automaticLayout: true,
+                    accessibilitySupport: 'auto',
+                    ariaLabel: tr(locale, 'Python-редактор задания Engineer', 'Engineer Python editor'),
+                    cursorBlinking: 'smooth',
+                    fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', monospace",
+                    fontLigatures: true,
+                    fontSize: 14,
+                    lineHeight: 23,
+                    lineNumbersMinChars: 3,
+                    minimap: {enabled: false},
+                    padding: {top: 18, bottom: 18},
+                    renderLineHighlight: 'all',
+                    roundedSelection: false,
+                    scrollBeyondLastLine: false,
+                    smoothScrolling: true,
+                    tabSize: 4,
+                    insertSpaces: true,
+                    wordWrap: 'on',
+                  }}
+                />
+              </section>
+              <footer className={monacoStyles.editorStatus}>
+                <span>Python</span>
+                <span>UTF-8</span>
+                <span>Spaces: 4</span>
+                <span>Monaco Editor</span>
+              </footer>
             </div>
           </div>
         )}

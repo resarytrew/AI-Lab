@@ -1,0 +1,66 @@
+.editorInstruction {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-left: 3px solid #d84c28;
+  background: #f6f1ea;
+  color: #5d554d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.languageBadge {
+  margin-left: auto;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 196, 0, .32);
+  border-radius: 999px;
+  color: #ffc400;
+  font: 800 9px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.editorFrame {
+  height: clamp(340px, 42vw, 520px);
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  background: #1e1e1e;
+  box-shadow: 0 18px 45px rgba(0,0,0,.2);
+}
+
+.editorLoading {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #a9a39b;
+  background: #1e1e1e;
+  font: 700 11px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: .04em;
+}
+
+.editorStatus {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+  color: #777169;
+  font: 700 9px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: .04em;
+}
+
+.editorStatus span:first-child {
+  color: #ffc400;
+}
+
+@media (max-width: 720px) {
+  .editorFrame {
+    height: 360px;
+    margin-top: 14px;
+  }
+
+  .editorStatus {
+    justify-content: flex-start;
+  }
+}
