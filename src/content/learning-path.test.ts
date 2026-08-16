@@ -27,6 +27,8 @@ describe('AI Lab learning path', () => {
     expect(learningStages).toHaveLength(16);
     expect(learningStages[0]?.id).toBe('instructions');
     expect(learningStages.at(-1)?.id).toBe('systems-and-defense');
-    learningStages.forEach((stage, index) => expect(stage.index).toBe(index));
+    learningStages.forEach((stage, index) => {
+      expect(stage.index).toBe(index);
+    });
   });
 });
