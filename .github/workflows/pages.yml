@@ -47,7 +47,7 @@ jobs:
           DEPLOY_TARGET: github-pages
         run: npm run build
 
-      - name: Add default Russian entry point
+      - name: Add default Russian Technopark entry point
         run: |
           cat > out/index.html <<'HTML'
           <!doctype html>
@@ -55,11 +55,15 @@ jobs:
             <head>
               <meta charset="utf-8" />
               <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <meta http-equiv="refresh" content="0; url=./ru/" />
-              <title>AI Lab</title>
+              <meta name="robots" content="noindex" />
+              <meta http-equiv="refresh" content="0; url=./ru/technopark/entry/" />
+              <title>AI Lab · Технопарк</title>
+              <script>
+                window.location.replace('./ru/technopark/entry/');
+              </script>
             </head>
             <body>
-              <p><a href="./ru/">Открыть AI Lab</a></p>
+              <p><a href="./ru/technopark/entry/">Войти в Технопарк AI Lab</a></p>
             </body>
           </html>
           HTML
