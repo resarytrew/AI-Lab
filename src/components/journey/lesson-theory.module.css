@@ -231,10 +231,6 @@
 .afterTheory {
   max-width: 1240px;
   margin: 26px auto 0;
-  display: grid;
-  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
-  gap: 18px;
-  align-items: start;
 }
 
 @media (max-width: 980px) {
@@ -248,8 +244,7 @@
     margin-bottom: 0;
   }
 
-  .theoryBody,
-  .afterTheory {
+  .theoryBody {
     grid-template-columns: 1fr;
   }
 
@@ -261,29 +256,16 @@
 
 @media (max-width: 640px) {
   .theorySection {
-    margin-top: 46px;
-    padding-top: 36px;
+    margin-top: 48px;
+    padding-top: 38px;
   }
 
   .theoryHeading > p:last-child {
     font-size: 18px;
   }
 
-  .theoryChapter {
-    grid-template-columns: 38px 1fr;
-    gap: 12px;
-  }
-
-  .theoryChapter h3 {
-    font-size: 21px;
-  }
-
   .theorySidebar,
   .theoryChecks {
-    grid-template-columns: 1fr;
-  }
-
-  .discoveryNext {
     grid-template-columns: 1fr;
   }
 }
