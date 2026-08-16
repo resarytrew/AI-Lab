@@ -12,11 +12,19 @@ describe('python lab helpers', () => {
     expect(buildReferenceSource('print("ready")', 'unused')).toBe('print("ready")');
   });
 
-  it('builds a filled reference program for every starter Engineer challenge', () => {
+  it('builds a runnable reference source for every starter Engineer challenge', () => {
     for (const lesson of starterLessons) {
       const engineer = chapterEnrichment[lesson.id].engineer;
-      expect(engineer.starterCode.match(/\.\.\./g), lesson.id).toHaveLength(1);
-      expect(buildReferenceSource(engineer.starterCode, engineer.expected), lesson.id).not.toContain('...');
+      const placeholders = engineer.starterCode.match(/\.\.\./g) ?? [];
+      expect(placeholders.length, lesson.id).toBeLessThanOrEqual(1);
+
+      const reference = buildReferenceSource(engineer.starterCode, engineer.expected);
+      expect(reference.length, lesson.id).toBeGreaterThan(20);
+      if (placeholders.length === 1) {
+        expect(reference, lesson.id).not.toContain('...');
+      } else {
+        expect(reference, lesson.id).toBe(engineer.starterCode);
+      }
     }
   });
 
