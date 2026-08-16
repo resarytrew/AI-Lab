@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {useEffect, useMemo, useState, type ReactNode} from 'react';
-import heroScene from '@/assets/technopark-entry.webp';
+import {technoparkHeroRaster} from '@/assets/technopark-entry-raster';
 import {getTechnoparkEntryCopy, type DeviceId} from '@/content/quests/technopark-entry-copy';
 import {
   hasCoreAbilitySet,
@@ -60,7 +60,7 @@ function Rail({scene}: {scene: number}) {
 function PhotoStage({scene, children}: {scene: number; children?: ReactNode}) {
   return (
     <div className={styles.photoStage}>
-      <Image className={styles.photo} src={heroScene} alt="Исследовательская лаборатория AI Lab" priority={scene === 0} fill sizes="(max-width: 900px) 100vw, 58vw" />
+      <Image className={styles.photo} src={technoparkHeroRaster} alt="Исследовательская лаборатория AI Lab" priority={scene === 0} fill unoptimized sizes="(max-width: 900px) 100vw, 58vw" />
       <div className={styles.photoVignette} />
       <div className={styles.photoMeta}><span>AI LAB / HALL 01</span><b>{String(scene + 1).padStart(2, '0')}</b></div>
       {children}
