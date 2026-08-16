@@ -47,7 +47,7 @@ jobs:
           DEPLOY_TARGET: github-pages
         run: npm run build
 
-      - name: Add default Russian beginner journey entry point
+      - name: Add default Russian intelligence-first entry point
         run: |
           cat > out/index.html <<'HTML'
           <!doctype html>
@@ -56,14 +56,14 @@ jobs:
               <meta charset="utf-8" />
               <meta name="viewport" content="width=device-width, initial-scale=1" />
               <meta name="robots" content="noindex" />
-              <meta http-equiv="refresh" content="0; url=./ru/journey/human-knows-rule/" />
-              <title>AI Lab · От нуля до MyGPT</title>
+              <meta http-equiv="refresh" content="0; url=./ru/journey/smart-machine/" />
+              <title>AI Lab · От вопроса об интеллекте до MyGPT</title>
               <script>
-                window.location.replace('./ru/journey/human-knows-rule/');
+                window.location.replace('./ru/journey/smart-machine/');
               </script>
             </head>
             <body>
-              <p><a href="./ru/journey/human-knows-rule/">Начать AI Lab с нуля</a></p>
+              <p><a href="./ru/journey/smart-machine/">Начать AI Lab: что делает машину умной?</a></p>
             </body>
           </html>
           HTML
