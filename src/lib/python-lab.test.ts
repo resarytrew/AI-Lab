@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
-import {chapterEnrichment} from '@/content/chapter-enrichment';
-import {starterLessons} from '@/content/learning-path';
+import {chapterEnrichment} from '../content/chapter-enrichment';
+import {starterLessons} from '../content/learning-path';
 import {buildReferenceSource, resolvePythonWorkerUrl} from './python-lab';
 
 describe('python lab helpers', () => {
