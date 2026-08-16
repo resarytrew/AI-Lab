@@ -1,22 +1,22 @@
-import { setRequestLocale } from 'next-intl/server';
+import {setRequestLocale} from 'next-intl/server';
 
 export default async function LocaleHome({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{locale: string}>;
 }) {
-  const { locale } = await params;
+  const {locale} = await params;
   setRequestLocale(locale);
 
   return (
-    <main style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{padding: '2rem', fontFamily: 'system-ui, sans-serif'}}>
       <meta
         httpEquiv="refresh"
-        content="0; url=./learn/foundations/first-neuron/"
+        content="0; url=./learn/foundations/what-is-model/"
       />
       <p>
-        <a href="./learn/foundations/first-neuron/">
-          {locale === 'ru' ? 'Открыть первый урок' : 'Open the first lesson'}
+        <a href="./learn/foundations/what-is-model/">
+          {locale === 'ru' ? 'Открыть курс AI Lab' : 'Open the AI Lab course'}
         </a>
       </p>
     </main>

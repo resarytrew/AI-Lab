@@ -4,55 +4,58 @@ import {useTranslations} from 'next-intl';
 import {useMemo, useState} from 'react';
 import {LessonCodePanel} from '@/components/course/lesson-code-panel';
 import {CourseShell} from '@/components/course/course-shell';
-import {neuronOutput, neuronSeries} from '@/lib/neuron';
+import {getFoundationHref} from '@/content/course';
+import {linearFunction, linearSeries} from '@/lib/foundations';
 
-export function FirstNeuronLesson() {
+export function VariablesFunctionsLesson() {
   const t = useTranslations();
   const [x, setX] = useState(3);
-  const [weight, setWeight] = useState(2);
-  const [bias, setBias] = useState(1);
+  const [scale, setScale] = useState(2);
+  const [shift, setShift] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [runOutput, setRunOutput] = useState<string | null>(null);
 
-  const output = neuronOutput(x, weight, bias);
-  const series = useMemo(() => neuronSeries(weight, bias), [weight, bias]);
+  const output = linearFunction(x, scale, shift);
+  const series = useMemo(() => linearSeries(scale, shift), [scale, shift]);
   const points = series
     .map(({x: px, y}) => {
       const sx = 14 + ((px + 2) / 6) * 212;
-      const clamped = Math.max(-10, Math.min(20, y));
-      const sy = 116 - ((clamped + 10) / 30) * 96;
+      const clamped = Math.max(-15, Math.min(20, y));
+      const sy = 116 - ((clamped + 15) / 35) * 96;
       return `${sx},${sy}`;
     })
     .join(' ');
   const currentX = 14 + ((x + 2) / 6) * 212;
   const currentY =
-    116 - ((Math.max(-10, Math.min(20, output)) + 10) / 30) * 96;
+    116 - ((Math.max(-15, Math.min(20, output)) + 15) / 35) * 96;
 
   const pythonLines = [
-    'def neuron(x, w, b):',
-    '    return x * w + b',
+    'def transform(x, scale, shift):',
+    '    return x * scale + shift',
     '',
     `x = ${x}`,
-    `w = ${weight}`,
-    `b = ${bias}`,
+    `scale = ${scale}`,
+    `shift = ${shift}`,
     '',
-    'y = neuron(x, w, b)',
+    'y = transform(x, scale, shift)',
     "print('Output:', y)",
   ];
-  const answers = ['increase', 'decrease', 'same'] as const;
+
+  const answers = ['inputParams', 'allInputs', 'functionName'] as const;
 
   return (
     <CourseShell
-      currentLessonId="first-neuron"
+      currentLessonId="variables-and-functions"
       codePanel={
         <LessonCodePanel
-          fileName="neuron.py"
+          fileName="functions.py"
           lines={pythonLines}
           output={runOutput}
           onRun={() => setRunOutput(`Output: ${output}`)}
           onReset={() => setRunOutput(null)}
-          helper={t('code.helper')}
+          nextHref={getFoundationHref('first-neuron')}
+          helper={t('variablesLesson.codeHelper')}
         />
       }
     >
@@ -62,10 +65,10 @@ export function FirstNeuronLesson() {
             <div className="breadcrumb">
               <span>{t('course.foundations')}</span>
               <b>›</b>
-              {t('course.firstNeuron')}
+              {t('course.variables')}
             </div>
-            <h1>{t('firstNeuron.title')}</h1>
-            <p>{t('firstNeuron.subtitle')}</p>
+            <h1>{t('variablesLesson.title')}</h1>
+            <p>{t('variablesLesson.subtitle')}</p>
           </div>
           <button className="bookmark" type="button">
             ♡ {t('lesson.bookmark')}
@@ -90,47 +93,42 @@ export function FirstNeuronLesson() {
         <div className="learning-grid">
           <article className="panel playground-panel">
             <div className="panel-title">
-              <h2>{t('firstNeuron.playground')}</h2>
-              <span title={t('firstNeuron.playgroundHint')}>ⓘ</span>
+              <h2>{t('variablesLesson.playground')}</h2>
+              <span title={t('variablesLesson.playgroundHint')}>ⓘ</span>
             </div>
-            <div
-              className="neuron-diagram"
-              role="img"
-              aria-label={t('firstNeuron.diagramLabel')}
-            >
-              <div className="diagram-node input-node">
-                <b>x</b>
-                <small>{t('firstNeuron.input')}</small>
-              </div>
-              <span className="arrow">→</span>
-              <div className="operator-node multiply">
-                ×<small>{t('firstNeuron.weight')}</small><em>w</em>
-              </div>
-              <span className="arrow">→</span>
-              <div className="operator-node plus">
-                +<small>{t('firstNeuron.bias')}</small><em>b</em>
-              </div>
-              <span className="arrow">→</span>
-              <div className="diagram-node output-node">
-                <b>y</b>
-                <small>{t('firstNeuron.output')}</small>
-              </div>
-            </div>
-            <div className="formula-main">y = wx + b</div>
 
-            <div className="playground-bottom">
+            <div className="function-machine">
+              <div className="variable-stack">
+                <VariableChip symbol="x" label={t('variablesLesson.input')} value={x} tone="green" />
+                <VariableChip symbol="a" label={t('variablesLesson.scale')} value={scale} tone="blue" />
+                <VariableChip symbol="b" label={t('variablesLesson.shift')} value={shift} tone="amber" />
+              </div>
+              <span className="flow-arrow">→</span>
+              <div className="function-box">
+                <small>{t('variablesLesson.function')}</small>
+                <strong>f(x) = ax + b</strong>
+                <code>return x * a + b</code>
+              </div>
+              <span className="flow-arrow">→</span>
+              <div className="flow-value output-flow-value">
+                <small>{t('variablesLesson.output')}</small>
+                <strong>y = {output}</strong>
+              </div>
+            </div>
+
+            <div className="playground-bottom function-playground-bottom">
               <div className="controls">
-                <SliderRow label="x" hint={t('firstNeuron.input')} min={-5} max={5} value={x} onChange={setX} />
-                <SliderRow label="w" hint={t('firstNeuron.weight')} min={-3} max={3} value={weight} onChange={setWeight} />
-                <SliderRow label="b" hint={t('firstNeuron.bias')} min={-5} max={5} value={bias} onChange={setBias} />
+                <SliderRow label="x" hint={t('variablesLesson.input')} min={-2} max={4} value={x} onChange={setX} />
+                <SliderRow label="a" hint={t('variablesLesson.scale')} min={-3} max={3} value={scale} onChange={setScale} />
+                <SliderRow label="b" hint={t('variablesLesson.shift')} min={-5} max={5} value={shift} onChange={setShift} />
                 <div className="output-box">
-                  <span>{t('firstNeuron.output')}</span>
-                  <b>y = {output}</b>
+                  <span>{t('variablesLesson.output')}</span>
+                  <b>f({x}) = {output}</b>
                 </div>
               </div>
               <div className="mini-chart">
-                <strong>{t('firstNeuron.chart')}</strong>
-                <svg viewBox="0 0 240 130" role="img" aria-label={t('firstNeuron.chart')}>
+                <strong>{t('variablesLesson.chart')}</strong>
+                <svg viewBox="0 0 240 130" role="img" aria-label={t('variablesLesson.chart')}>
                   <line x1="14" y1="116" x2="228" y2="116" className="axis" />
                   <line x1="14" y1="12" x2="14" y2="116" className="axis" />
                   <line x1="14" y1="84" x2="228" y2="84" className="gridline" />
@@ -139,7 +137,7 @@ export function FirstNeuronLesson() {
                   <circle cx={currentX} cy={currentY} r="4" className="plot-dot" />
                 </svg>
                 <span className="chart-caption">
-                  w={weight}, b={bias}, ({x}, {output})
+                  a={scale}, b={shift}, ({x}, {output})
                 </span>
               </div>
             </div>
@@ -147,27 +145,27 @@ export function FirstNeuronLesson() {
 
           <article className="panel by-hand-panel">
             <div className="panel-title">
-              <h2>{t('firstNeuron.byHand')}</h2>
+              <h2>{t('variablesLesson.byHand')}</h2>
               <span>ⓘ</span>
             </div>
-            <p>{t('firstNeuron.byHandText')}</p>
+            <p>{t('variablesLesson.byHandText')}</p>
             <div className="calculation-list">
               <CalcRow symbol="x" value={`${x}`} tone="green" />
-              <CalcRow symbol="w" value={`${weight}`} tone="blue" />
-              <CalcRow symbol="b" value={`${bias}`} tone="amber" />
-              <CalcRow symbol="wx" value={`${x} × ${weight} = ${x * weight}`} tone="blue" />
-              <CalcRow symbol="y" value={`${x * weight} + ${bias} = ${output}`} tone="green" />
+              <CalcRow symbol="a" value={`${scale}`} tone="blue" />
+              <CalcRow symbol="b" value={`${shift}`} tone="amber" />
+              <CalcRow symbol="ax" value={`${scale} × ${x} = ${scale * x}`} tone="blue" />
+              <CalcRow symbol="f(x)" value={`${scale * x} + ${shift} = ${output}`} tone="green" />
             </div>
             <div className="formula-card">
-              <b>y = wx + b</b>
-              <small>{t('firstNeuron.formulaNote')}</small>
+              <b>f(x) = ax + b</b>
+              <small>{t('variablesLesson.formulaNote')}</small>
             </div>
           </article>
         </div>
 
         <article className="panel quiz-panel">
           <small>{t('quiz.quickCheck')}</small>
-          <h2>{t('quiz.question')}</h2>
+          <h2>{t('variablesLesson.quiz.question')}</h2>
           <div className="answers">
             {answers.map((answer, index) => (
               <button
@@ -180,16 +178,16 @@ export function FirstNeuronLesson() {
                 }}
               >
                 <span>{String.fromCharCode(65 + index)}</span>
-                {t(`quiz.${answer}`)}
+                {t(`variablesLesson.quiz.${answer}`)}
               </button>
             ))}
           </div>
           <div className="quiz-footer">
-            <p className={checked ? (selectedAnswer === 'increase' ? 'success-text' : 'error-text') : ''}>
+            <p className={checked ? (selectedAnswer === 'inputParams' ? 'success-text' : 'error-text') : ''}>
               {checked
-                ? selectedAnswer === 'increase'
-                  ? t('quiz.correct')
-                  : t('quiz.tryAgain')
+                ? selectedAnswer === 'inputParams'
+                  ? t('variablesLesson.quiz.correct')
+                  : t('variablesLesson.quiz.tryAgain')
                 : ''}
             </p>
             <button
@@ -204,6 +202,28 @@ export function FirstNeuronLesson() {
         </article>
       </section>
     </CourseShell>
+  );
+}
+
+function VariableChip({
+  symbol,
+  label,
+  value,
+  tone,
+}: {
+  symbol: string;
+  label: string;
+  value: number;
+  tone: string;
+}) {
+  return (
+    <div className={`variable-chip ${tone}`}>
+      <span>{symbol}</span>
+      <div>
+        <small>{label}</small>
+        <strong>{value}</strong>
+      </div>
+    </div>
   );
 }
 

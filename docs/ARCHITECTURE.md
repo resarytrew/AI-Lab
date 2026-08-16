@@ -2,63 +2,89 @@
 
 ## Goal
 
-AI Lab is not a collection of static pages. It is an interactive learning system where a learner progressively constructs a language model. The architecture therefore separates **content**, **interactive labs**, **code execution**, **assessment**, and **learner state**.
+AI Lab is not a collection of static pages. It is an interactive learning system where a learner progressively constructs a language model. The architecture separates **course content**, **interactive labs**, **code execution**, **assessment**, and **learner state**.
 
 ## Current boundary
 
-The first vertical slice deliberately keeps infrastructure small while preserving the seams needed for scale:
+The Foundations vertical slice now uses a shared course shell and a typed course registry:
 
 ```text
 localized route
-  └─ lesson shell
-      ├─ course navigation
-      ├─ interactive lab
-      ├─ by-hand derivation
-      ├─ assessment
-      ├─ code panel
-      └─ MyAI milestone
+  └─ typed lesson id
+      └─ CourseShell
+          ├─ course navigation + progress
+          ├─ interactive lesson lab
+          ├─ by-hand derivation
+          ├─ assessment
+          ├─ reusable code panel
+          └─ MyAI milestones
+```
+
+The first learning path is deliberately continuous:
+
+```text
+What is a Model
+  → Variables & Functions
+    → First Neuron
+      → Loss
+        → Gradient Descent
+          → Backpropagation
 ```
 
 ## Frontend
 
 - Next.js App Router with locale as the first route segment.
 - React client components only where interaction requires state.
-- Server Components remain the default for future content and data loading.
+- Server Components remain the default for route composition and future data loading.
 - `next-intl` owns locale routing and messages.
-- Russian is the default locale; English is a first-class locale, not a machine-translated afterthought.
-- CSS design tokens define the Editorial visual language; no UI framework is allowed to become the product architecture.
+- Russian is the default locale; English is a first-class locale.
+- CSS design tokens define the Editorial visual language; the project does not depend on a UI kit for its product identity.
+- GitHub Pages receives a static export from `main`; the application architecture remains compatible with a future server-backed deployment.
 
 ## Learning-domain model
 
-Future lessons should be represented as data rather than duplicated page implementations:
+Course sequencing is defined in `src/content/course.ts`. Routes and navigation consume that registry rather than duplicating lesson order in components.
+
+A lesson definition owns stable domain metadata such as:
 
 ```ts
 type Lesson = {
   id: string;
-  moduleId: string;
+  slug: string;
   prerequisites: string[];
-  stages: ('predict' | 'explore' | 'by-hand' | 'code' | 'experiment')[];
-  concepts: string[];
-  milestone?: string;
+  implemented: boolean;
 };
 ```
 
-Interactive labs remain typed components referenced by lesson definitions.
+As the curriculum grows, the registry will expand with concepts, stages, assessments, code tests and MyAI milestones. Interactive labs remain typed components rather than serialized arbitrary UI.
+
+## Shared shell
+
+`CourseShell` is responsible for concerns that must stay consistent across all lessons:
+
+- locale switching;
+- global navigation;
+- course progress;
+- module/lesson navigation;
+- locked/implemented lesson states;
+- MyAI milestone progression.
+
+Individual lesson components own only their pedagogy and interactive state.
 
 ## Code execution
 
-The current first-neuron screen demonstrates the code workflow without shipping a Python VM into the initial bundle. The target architecture is a lazy-loaded sandbox boundary:
+The current screens demonstrate the code workflow without executing arbitrary Python. The target architecture is a lazy-loaded sandbox boundary:
 
 1. browser-safe Python runtime for introductory exercises;
 2. worker isolation and execution timeouts;
-3. deterministic test cases supplied by the lesson definition;
+3. deterministic test cases supplied by lesson definitions;
 4. remote compute only for training workloads that cannot reasonably run on-device.
 
 No arbitrary user code should execute in the Next.js server process.
 
 ## Persistence
 
-The UI currently derives progress locally from the vertical slice. A persistence adapter will later own:
+Progress is currently derived from the active lesson. A persistence adapter will later own:
 
 - learner identity;
 - lesson attempts and checkpoints;
@@ -70,20 +96,19 @@ The domain layer must not depend directly on a specific database vendor.
 
 ## Quality gates
 
-Every pull request should pass:
+Every pull request must pass:
 
 - TypeScript strict typecheck;
 - unit tests;
-- Biome lint/format rules;
+- Biome lint;
 - production Next.js build.
 
-The first GitHub Actions workflow establishes those gates immediately.
+GitHub Pages additionally validates the static-export deployment target.
 
 ## Near-term roadmap
 
-1. Stabilize the course shell and Editorial design system.
-2. Extract lesson metadata and progress into a typed content registry.
-3. Build lessons: model → variables/functions → neuron → loss → gradient → backprop.
-4. Add sandboxed Python execution.
-5. Add learner persistence and authentication.
-6. Continue the vertical curriculum through tokenization, bigram LM, embeddings, attention and TinyGPT.
+1. Complete Foundations: model → variables/functions → neuron → loss → gradient → backprop.
+2. Add real stage progression: Predict → Explore → By Hand → Code → Experiment.
+3. Add sandboxed Python execution and deterministic code tests.
+4. Add learner persistence and authentication.
+5. Continue through tokenization, bigram LM, embeddings, attention and TinyGPT.
