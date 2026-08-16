@@ -1,5 +1,4 @@
 import {setRequestLocale} from 'next-intl/server';
-import {VariablesFunctionsLesson} from '@/components/lessons/variables-functions-lesson';
 
 export default async function VariablesFunctionsPage({
   params,
@@ -8,5 +7,15 @@ export default async function VariablesFunctionsPage({
 }) {
   const {locale} = await params;
   setRequestLocale(locale);
-  return <VariablesFunctionsLesson />;
+
+  return (
+    <main style={{padding: '2rem', fontFamily: 'system-ui, sans-serif'}}>
+      <meta httpEquiv="refresh" content="0; url=../../../technopark/entry/" />
+      <p>
+        <a href="../../../technopark/entry/">
+          {locale === 'ru' ? 'Перейти в Технопарк AI Lab' : 'Continue to the AI Lab Technopark'}
+        </a>
+      </p>
+    </main>
+  );
 }
