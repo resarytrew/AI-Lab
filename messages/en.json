@@ -2,8 +2,59 @@
   "nav": {"aria":"Primary navigation","learn":"Learn","labs":"Labs","code":"Code","myAi":"MyAI","progress":"Progress","docs":"Docs","notifications":"Notifications","switchLanguage":"Switch language","profile":"Profile"},
   "course": {"progress":"Course Progress","completed":"{done} of {total} lessons completed","map":"Course Map","foundations":"Foundations","whatIsModel":"What is a Model","variables":"Variables & Functions","firstNeuron":"First Neuron","loss":"Loss","gradient":"Gradient Descent","backprop":"Backpropagation","tokenization":"Tokenization","attention":"Attention","transformer":"Transformer","myGpt":"MyGPT","download":"Download Course Resources"},
   "lesson": {"bookmark":"Bookmark","steps":"Lesson steps","predict":"Predict","explore":"Explore","code":"Code"},
+  "whatIsModel": {
+    "title":"What is a Model",
+    "subtitle":"Start without magic: input, transformation rule, and output.",
+    "playground":"Black Box Lab",
+    "playgroundHint":"Change the input and rule to see a model as an ordinary computation.",
+    "diagramLabel":"Model diagram: input, transformation, output",
+    "input":"input",
+    "output":"output",
+    "blackBox":"model",
+    "chooseRule":"Choose the rule inside the model",
+    "transformation":"transformation",
+    "rules":{"double":"Double x","plusThree":"Add 3","square":"Square x"},
+    "conceptTitle":"Key idea",
+    "conceptText":"At this level, a model is a function: it receives input x, applies a rule, and returns output y. Later, machine learning will let the computer fit the parameters of such rules from data.",
+    "byHand":"By Hand",
+    "byHandText":"Let's unpack the current black box as an ordinary function.",
+    "formulaNote":"f is the transformation rule applied to input x",
+    "codeHelper":"Change the rule or x, run the code, and verify that Python computes the same result.",
+    "quiz": {
+      "question":"Which description best matches a model in this lesson?",
+      "function":"A function that transforms an input into an output.",
+      "database":"A table containing every possible answer in advance.",
+      "magic":"A black box that cannot be described by computations.",
+      "correct":"Correct. Even a huge neural network is ultimately a computable transformation from input to output.",
+      "tryAgain":"Look at the diagram: x enters rule f and becomes y."
+    }
+  },
+  "variablesLesson": {
+    "title":"Variables & Functions",
+    "subtitle":"Learn to express transformations so a computer can execute them again and again.",
+    "playground":"Function Machine",
+    "playgroundHint":"x is the input; a and b control the transformation. Change them and watch the graph.",
+    "input":"input",
+    "scale":"scale",
+    "shift":"shift",
+    "function":"function",
+    "output":"output",
+    "chart":"Graph of f(x)",
+    "byHand":"By Hand",
+    "byHandText":"Substitute values into f(x) = ax + b step by step.",
+    "formulaNote":"x is the function input; a and b are numbers controlling the transformation",
+    "codeHelper":"Change x, a, and b, then run the function and compare the result with the graph.",
+    "quiz": {
+      "question":"In f(x) = ax + b, what is the input and what controls the transformation?",
+      "inputParams":"x is the input; a and b set the scale and shift.",
+      "allInputs":"x, a, and b are identical inputs with no different roles.",
+      "functionName":"Only the name f determines the result; the numbers do not matter.",
+      "correct":"Correct. In the next lesson, a and b become the weight w and bias b of our first neuron.",
+      "tryAgain":"Change each slider and observe its role in both the formula and the graph."
+    }
+  },
   "firstNeuron": {"title":"First Neuron","subtitle":"How a model turns inputs into an output.","playground":"Neuron Playground","playgroundHint":"Change the values and observe how the output changes.","diagramLabel":"Single neuron diagram","input":"input","weight":"weight","bias":"bias","output":"output","chart":"Output y vs. input x","byHand":"By Hand","byHandText":"Let's compute the neuron output step by step.","formulaNote":"w = weight, b = bias"},
   "quiz": {"quickCheck":"Quick Check","question":"What happens if we increase weight w while x is positive?","increase":"The output y increases for the same x.","decrease":"The output y decreases for the same x.","same":"The output y stays the same — it only depends on b.","check":"Check Answer","correct":"Correct. The weight controls how strongly input x influences the output.","tryAgain":"Not yet. Look at y = wx + b and change w in the playground."},
   "code": {"reset":"Reset","run":"Run","ready":"Code is ready to run","next":"Next Lesson","helper":"Adjust the values, run the code, then continue."},
-  "build": {"title":"Build MyAI","subtitle":"Each lesson adds a new mechanism to your model.","neuron":"Neuron","loss":"Loss","gradient":"Gradient","bigram":"Bigram","attention":"Attention","transformer":"Transformer"}
+  "build": {"title":"Build MyAI","subtitle":"Each lesson adds a new mechanism to your model.","model":"Model","function":"Function","neuron":"Neuron","loss":"Loss","gradient":"Gradient","bigram":"Bigram","attention":"Attention","transformer":"Transformer","complete":"Complete","inProgress":"In progress","next":"Next","locked":"Locked"}
 }

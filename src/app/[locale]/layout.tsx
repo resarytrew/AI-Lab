@@ -4,10 +4,11 @@ import {getMessages, setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
 import '../globals.css';
+import '../foundations.css';
 
 export const metadata: Metadata = {
   title: {default: 'AI Lab', template: '%s · AI Lab'},
-  description: 'Интерактивный курс: от первого нейрона до собственной языковой модели.'
+  description: 'Интерактивный курс: от первого нейрона до собственной языковой модели.',
 };
 
 export const dynamicParams = false;
@@ -18,7 +19,7 @@ export function generateStaticParams() {
 
 export default async function LocaleLayout({
   children,
-  params
+  params,
 }: Readonly<{
   children: React.ReactNode;
   params: Promise<{locale: string}>;
