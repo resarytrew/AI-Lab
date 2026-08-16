@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import {setRequestLocale} from 'next-intl/server';
-import {TechnoparkEntryQuest} from '@/components/quest/technopark-entry-quest';
+import {TechnoparkEntryHybrid} from '@/components/quest/technopark-entry-hybrid';
 
 export async function generateMetadata({
   params,
@@ -26,5 +26,5 @@ export default async function TechnoparkEntryPage({
   const {locale} = await params;
   setRequestLocale(locale);
 
-  return <TechnoparkEntryQuest locale={locale} />;
+  return <TechnoparkEntryHybrid locale={locale} />;
 }
