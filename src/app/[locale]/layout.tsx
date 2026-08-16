@@ -8,7 +8,7 @@ import '../foundations.css';
 
 export const metadata: Metadata = {
   title: {default: 'AI Lab', template: '%s · AI Lab'},
-  description: 'Интерактивный курс с нуля: от первого правила и Python до собственной GPT-подобной языковой модели.',
+  description: 'Интерактивный курс: от вопроса «что делает машину умной?» через данные, обучение и нейросети до собственной GPT-подобной языковой модели.',
 };
 
 export const dynamicParams = false;
