@@ -49,7 +49,7 @@ function TheoryLayer({lessonId, locale}: {lessonId: StarterLessonId; locale: str
       <div className={theoryStyles.theoryBody}>
         <div className={theoryStyles.theoryChapters}>
           {theory.sections.map((section, index) => (
-            <article className={theoryStyles.theoryChapter} key={`${lessonId}-theory-${index + 1}`}>
+            <article className={theoryStyles.theoryChapter} key={`${lessonId}-${section.title.en}`}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <div>
                 <h3>{localize(section.title, locale)}</h3>
