@@ -9,6 +9,8 @@ import {
   starterLessons,
   type StarterLessonId,
 } from '@/content/learning-path';
+import {getLessonTheory} from '@/content/lesson-theory';
+import theoryStyles from './lesson-theory.module.css';
 import {StarterLessonLab} from './starter-labs';
 import styles from './starter-lesson.module.css';
 
@@ -31,6 +33,62 @@ function loadCompleted() {
 
 function saveCompleted(ids: StarterLessonId[]) {
   window.localStorage.setItem(progressKey, JSON.stringify(ids));
+}
+
+function TheoryLayer({lessonId, locale}: {lessonId: StarterLessonId; locale: string}) {
+  const theory = getLessonTheory(lessonId);
+
+  return (
+    <section className={theoryStyles.theorySection}>
+      <div className={theoryStyles.theoryHeading}>
+        <p className={theoryStyles.theoryEyebrow}>{tr(locale, 'ТЕОРИЯ · после открытия', 'THEORY · after discovery')}</p>
+        <h2>{tr(locale, 'Теперь разберёмся, почему это работает', 'Now let’s understand why it works')}</h2>
+        <p>{localize(theory.intro, locale)}</p>
+      </div>
+
+      <div className={theoryStyles.theoryBody}>
+        <div className={theoryStyles.theoryChapters}>
+          {theory.sections.map((section, index) => (
+            <article className={theoryStyles.theoryChapter} key={`${lessonId}-${section.title.en}`}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{localize(section.title, locale)}</h3>
+                <p>{localize(section.body, locale)}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <aside className={theoryStyles.theorySidebar}>
+          <div className={theoryStyles.glossaryCard}>
+            <small>{tr(locale, 'СЛОВАРЬ', 'GLOSSARY')}</small>
+            {theory.terms.map(({term, definition}) => (
+              <div key={localize(term, locale)}>
+                <b>{localize(term, locale)}</b>
+                <p>{localize(definition, locale)}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className={theoryStyles.theoryExample}>
+            <small>{tr(locale, 'ПРИМЕР', 'EXAMPLE')}</small>
+            <p>{localize(theory.example, locale)}</p>
+          </div>
+        </aside>
+      </div>
+
+      <div className={theoryStyles.theoryChecks}>
+        <article className={theoryStyles.misconceptionCard}>
+          <small>{tr(locale, 'НЕ ПЕРЕПУТАЙ', 'COMMON MISCONCEPTION')}</small>
+          <p>{localize(theory.misconception, locale)}</p>
+        </article>
+        <article className={theoryStyles.takeawayCard}>
+          <small>{tr(locale, 'ГЛАВНАЯ МЫСЛЬ', 'KEY TAKEAWAY')}</small>
+          <p>{localize(theory.takeaway, locale)}</p>
+        </article>
+      </div>
+    </section>
+  );
 }
 
 export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonSlug: string}) {
@@ -94,7 +152,7 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
           {isComplete && (
             <div className={styles.revealStack}>
               <div className={styles.conceptCard}>
-                <small>{tr(locale, 'Теперь вводим понятие', 'Now introduce the concept')}</small>
+                <small>{tr(locale, 'Открытое понятие', 'Discovered concept')}</small>
                 <p>{localize(lesson.concept, locale)}</p>
               </div>
               <div className={styles.outcomes}>
@@ -115,30 +173,42 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
           </div>
 
           {isComplete && (
-            <>
-              <div className={styles.checkpointCard}>
-                <small>{tr(locale, 'TRANSFER · новая ситуация', 'TRANSFER · new situation')}</small>
-                <p>{localize(lesson.checkpoint, locale)}</p>
-              </div>
-
-              <div className={styles.depthStack}>
-                <details>
-                  <summary>{tr(locale, 'Открой капот', 'Open the hood')}</summary>
-                  <p>{localize(lesson.deepDive, locale)}</p>
-                </details>
-                <details>
-                  <summary>Engineer</summary>
-                  <p>{localize(lesson.engineer, locale)}</p>
-                </details>
-                <details>
-                  <summary>Researcher</summary>
-                  <p>{localize(lesson.researcher, locale)}</p>
-                </details>
-              </div>
-            </>
+            <div className={theoryStyles.discoveryNext}>
+              <span>{tr(locale, 'Открытие сделано', 'Discovery complete')}</span>
+              <b>↓</b>
+              <p>{tr(locale, 'Теперь не угадываем дальше — разбираем механизм и фиксируем теорию.', 'Now we stop guessing and explain the mechanism in full.')}</p>
+            </div>
           )}
         </div>
       </section>
+
+      {isComplete && (
+        <>
+          <TheoryLayer lessonId={lesson.id} locale={locale} />
+
+          <section className={theoryStyles.afterTheory}>
+            <div className={styles.checkpointCard}>
+              <small>{tr(locale, 'TRANSFER · новая ситуация', 'TRANSFER · new situation')}</small>
+              <p>{localize(lesson.checkpoint, locale)}</p>
+            </div>
+
+            <div className={styles.depthStack}>
+              <details>
+                <summary>{tr(locale, 'Открой капот · математика и механизм', 'Open the hood · math and mechanism')}</summary>
+                <p>{localize(lesson.deepDive, locale)}</p>
+              </details>
+              <details>
+                <summary>Engineer · Code</summary>
+                <p>{localize(lesson.engineer, locale)}</p>
+              </details>
+              <details>
+                <summary>Researcher · Experiment</summary>
+                <p>{localize(lesson.researcher, locale)}</p>
+              </details>
+            </div>
+          </section>
+        </>
+      )}
 
       <footer className={styles.footer}>
         {previousHref ? <Link href={previousHref} className={styles.secondaryButton}>← {tr(locale, 'Назад', 'Back')}</Link> : <span />}
