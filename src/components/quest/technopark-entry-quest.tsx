@@ -4,6 +4,12 @@ import Link from 'next/link';
 import {useEffect, useState, type ReactNode} from 'react';
 import styles from './technopark-entry-quest.module.css';
 import {
+  AbilitiesIllustration,
+  IntroIllustration,
+  MachinesIllustration,
+  SpeedIllustration,
+} from './technopark-entry-illustrations';
+import {
   getTechnoparkEntryCopy,
   type DeviceId,
 } from '@/content/quests/technopark-entry-copy';
@@ -31,7 +37,7 @@ const routeCells = [
 function Mark() {
   return (
     <div className={styles.mark} role="img" aria-label="AI Lab">
-      <span>A</span>
+      <span>AI</span>
       <small>LAB</small>
     </div>
   );
@@ -118,7 +124,10 @@ function HelpButton() {
 function BottomAction({label, disabled, onClick}: {label: string; disabled?: boolean; onClick: () => void}) {
   return (
     <div className={styles.bottomAction}>
-      <button type="button" disabled={disabled} onClick={onClick}>{label}</button>
+      <button type="button" disabled={disabled} onClick={onClick}>
+        <span>{label}</span>
+        <span aria-hidden="true">→</span>
+      </button>
     </div>
   );
 }
@@ -165,30 +174,6 @@ function QuestionPanel({question, answers, selected, correctIndex, good, bad, on
       <h2>{question}</h2>
       <ChoiceList answers={answers} selected={selected} onSelect={onSelect} />
       {selected !== null && <Feedback good={correct}>{correct ? good : bad}</Feedback>}
-    </div>
-  );
-}
-
-function LabSceneArt() {
-  return (
-    <div className={styles.labSceneArt} aria-hidden="true">
-      <div className={styles.labBackdrop} />
-      <div className={styles.labWindow}><i /><i /><i /><i /></div>
-      <div className={styles.labDesk} />
-      <div className={styles.labMonitor}>
-        <div className={styles.monitorTopLine} />
-        <div className={styles.monitorRows}><i /><i /><i /></div>
-        <div className={styles.monitorGraph}><i /><i /><i /><i /></div>
-      </div>
-      <div className={styles.labKeyboard} />
-      <div className={styles.labNotebook}>01</div>
-      <div className={styles.labShelf}><i /><i /><i /></div>
-      <div className={styles.labPerson}>
-        <div className={styles.personHead} />
-        <div className={styles.personHair} />
-        <div className={styles.personBody} />
-        <div className={styles.personTablet} />
-      </div>
     </div>
   );
 }
@@ -250,7 +235,12 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
 
   if (scene === 0) {
     sceneBody = (
-      <SceneLayout kicker="Первый день в AI Lab" title="Вход в Технопарк: что делает машину умной?" lead={copy.intro.lead} visual={<LabSceneArt />}>
+      <SceneLayout
+        kicker="Первый день в AI Lab"
+        title="Вход в Технопарк: что делает машину умной?"
+        lead={copy.intro.lead}
+        visual={<IntroIllustration className={styles.heroIllustration} />}
+      >
         <div className={styles.storyCard}><strong>Задача</strong><p>{copy.intro.note}</p></div>
       </SceneLayout>
     );
@@ -261,27 +251,26 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
         kicker={copy.machines.eyebrow}
         title={copy.machines.title}
         lead={copy.machines.lead}
-        visual={
-          <div className={styles.deviceWall}>
-            {deviceIds.map((id) => {
-              const selected = progress.smartSystems.includes(id);
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={selected}
-                  className={`${styles.deviceCard} ${selected ? styles.deviceCardSelected : ''}`}
-                  onClick={() => setProgress((current) => ({...current, smartSystems: toggleInList(current.smartSystems, id)}))}
-                >
-                  <DeviceSymbol id={id} />
-                  <span>{copy.machines.devices[id]}</span>
-                  <i>{selected ? 'Выбрано' : 'Выбрать'}</i>
-                </button>
-              );
-            })}
-          </div>
-        }
+        visual={<MachinesIllustration className={styles.heroIllustration} />}
       >
+        <div className={styles.deviceWall}>
+          {deviceIds.map((id) => {
+            const selected = progress.smartSystems.includes(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={selected}
+                className={`${styles.deviceCard} ${selected ? styles.deviceCardSelected : ''}`}
+                onClick={() => setProgress((current) => ({...current, smartSystems: toggleInList(current.smartSystems, id)}))}
+              >
+                <DeviceSymbol id={id} />
+                <span>{copy.machines.devices[id]}</span>
+                <i>{selected ? 'Выбрано' : 'Выбрать'}</i>
+              </button>
+            );
+          })}
+        </div>
         <p className={styles.hintText}>{progress.smartSystems.length ? copy.machines.reveal : copy.machines.hint}</p>
       </SceneLayout>
     );
@@ -289,13 +278,12 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
     const correct = speedAnswer === 1;
     nextDisabled = !correct;
     sceneBody = (
-      <SceneLayout kicker={copy.speed.eyebrow} title={copy.speed.title} lead={copy.speed.lead} visual={
-        <div className={styles.raceBoard}>
-          <div><small>Человек</small><b>987 × 654</b><span>думает...</span></div>
-          <i>VS</i>
-          <div><small>Калькулятор</small><b>645 498</b><span>0,001 с</span></div>
-        </div>
-      }>
+      <SceneLayout
+        kicker={copy.speed.eyebrow}
+        title={copy.speed.title}
+        lead={copy.speed.lead}
+        visual={<SpeedIllustration className={styles.heroIllustration} />}
+      >
         <QuestionPanel question={copy.speed.question} answers={copy.speed.answers} selected={speedAnswer} correctIndex={1} good={copy.speed.good} bad={copy.speed.bad} onSelect={setSpeedAnswer} />
       </SceneLayout>
     );
@@ -304,7 +292,12 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
     const ready = hasCoreAbilitySet(progress.abilities);
     nextDisabled = !ready;
     sceneBody = (
-      <SceneLayout kicker={copy.abilities.eyebrow} title={copy.abilities.title} lead={copy.abilities.lead} visual={
+      <SceneLayout
+        kicker={copy.abilities.eyebrow}
+        title={copy.abilities.title}
+        lead={copy.abilities.lead}
+        visual={<AbilitiesIllustration className={styles.heroIllustration} />}
+      >
         <div className={styles.abilityBoard}>
           {abilities.map((ability) => {
             const selected = progress.abilities.includes(ability);
@@ -321,7 +314,6 @@ export function TechnoparkEntryQuest({locale}: {locale: string}) {
             );
           })}
         </div>
-      }>
         <p className={styles.hintText}>{ready ? copy.abilities.reveal : `${copy.abilities.hint} ${progress.abilities.length}/4`}</p>
       </SceneLayout>
     );
