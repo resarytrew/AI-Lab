@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
 import {LabLessonPage} from '@/components/journey/lab-lesson';
+import {ReferenceLearningLab} from '@/components/journey/reference-learning-lab';
 import {getStarterLesson, localize, starterLessons} from '@/content/learning-path';
 
 export const dynamicParams = false;
@@ -32,7 +33,9 @@ export default async function JourneyLessonRoute({
   const {locale, lesson: lessonSlug} = await params;
   setRequestLocale(locale);
 
-  if (!getStarterLesson(lessonSlug)) notFound();
+  const lesson = getStarterLesson(lessonSlug);
+  if (!lesson) notFound();
 
+  if (lesson.id === 'measure-error') return <ReferenceLearningLab locale={locale} />;
   return <LabLessonPage locale={locale} lessonSlug={lessonSlug} />;
 }
