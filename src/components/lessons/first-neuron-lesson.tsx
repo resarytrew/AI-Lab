@@ -1,20 +1,20 @@
 'use client';
 
-import {useLocale, useTranslations} from 'next-intl';
-import {useMemo, useState} from 'react';
-import {usePathname, useRouter} from '@/i18n/navigation';
-import {neuronOutput, neuronSeries} from '@/lib/neuron';
+import { useLocale, useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { neuronOutput, neuronSeries } from '@/lib/neuron';
 
 const pythonLines = [
-  'def neuron(x, w, b):',
-  '    return x * w + b',
-  '',
-  'x = 3',
-  'w = 2',
-  'b = 1',
-  '',
-  'y = neuron(x, w, b)',
-  "print('Output:', y)"
+  { id: 'function', text: 'def neuron(x, w, b):' },
+  { id: 'return', text: '    return x * w + b' },
+  { id: 'gap-1', text: '' },
+  { id: 'x', text: 'x = 3' },
+  { id: 'w', text: 'w = 2' },
+  { id: 'b', text: 'b = 1' },
+  { id: 'gap-2', text: '' },
+  { id: 'call', text: 'y = neuron(x, w, b)' },
+  { id: 'print', text: "print('Output:', y)" },
 ];
 
 export function FirstNeuronLesson() {
@@ -32,7 +32,7 @@ export function FirstNeuronLesson() {
   const output = neuronOutput(x, weight, bias);
   const series = useMemo(() => neuronSeries(weight, bias), [weight, bias]);
   const points = series
-    .map(({x: px, y}) => {
+    .map(({ x: px, y }) => {
       const sx = 14 + ((px + 2) / 6) * 212;
       const clamped = Math.max(-10, Math.min(20, y));
       const sy = 116 - ((clamped + 10) / 30) * 96;
@@ -42,7 +42,7 @@ export function FirstNeuronLesson() {
 
   const switchLocale = () => {
     const nextLocale = locale === 'ru' ? 'en' : 'ru';
-    router.replace(pathname, {locale: nextLocale});
+    router.replace(pathname, { locale: nextLocale });
   };
 
   const answers = ['increase', 'decrease', 'same'] as const;
@@ -64,7 +64,7 @@ export function FirstNeuronLesson() {
           <button className="locale-switch" type="button" onClick={switchLocale} aria-label={t('nav.switchLanguage')}>
             {locale === 'ru' ? 'EN' : 'RU'}
           </button>
-          <span className="avatar" aria-label={t('nav.profile')}>SR</span>
+          <span className="avatar" role="img" aria-label={t('nav.profile')}>SR</span>
         </div>
       </header>
 
@@ -74,8 +74,8 @@ export function FirstNeuronLesson() {
             <strong>{t('course.progress')}</strong>
             <span className="accent-text">3%</span>
           </div>
-          <div className="progress-track"><span style={{width: '3%'}} /></div>
-          <p>{t('course.completed', {done: 1, total: 43})}</p>
+          <div className="progress-track"><span style={{ width: '3%' }} /></div>
+          <p>{t('course.completed', { done: 1, total: 43 })}</p>
         </section>
 
         <section className="sidebar-block course-map">
@@ -110,7 +110,7 @@ export function FirstNeuronLesson() {
           <button className="bookmark" type="button">♡ {t('lesson.bookmark')}</button>
         </div>
 
-        <div className="stepper" aria-label={t('lesson.steps')}>
+        <div className="stepper" role="group" aria-label={t('lesson.steps')}>
           <div className="step done"><span>✓</span>{t('lesson.predict')}</div>
           <div className="step active"><span>2</span>{t('lesson.explore')}</div>
           <div className="step"><span>3</span>{t('lesson.code')}</div>
@@ -119,7 +119,7 @@ export function FirstNeuronLesson() {
         <div className="learning-grid">
           <article className="panel playground-panel">
             <div className="panel-title"><h2>{t('firstNeuron.playground')}</h2><span title={t('firstNeuron.playgroundHint')}>ⓘ</span></div>
-            <div className="neuron-diagram" aria-label={t('firstNeuron.diagramLabel')}>
+            <div className="neuron-diagram" role="img" aria-label={t('firstNeuron.diagramLabel')}>
               <div className="diagram-node input-node"><b>x</b><small>{t('firstNeuron.input')}</small></div>
               <span className="arrow">→</span>
               <div className="operator-node multiply">×<small>{t('firstNeuron.weight')}</small><em>w</em></div>
@@ -171,7 +171,7 @@ export function FirstNeuronLesson() {
           <h2>{t('quiz.question')}</h2>
           <div className="answers">
             {answers.map((answer, index) => (
-              <button key={answer} className={`answer ${selectedAnswer === answer ? 'selected-answer' : ''}`} type="button" onClick={() => {setSelectedAnswer(answer); setChecked(false);}}>
+              <button key={answer} className={`answer ${selectedAnswer === answer ? 'selected-answer' : ''}`} type="button" onClick={() => { setSelectedAnswer(answer); setChecked(false); }}>
                 <span>{String.fromCharCode(65 + index)}</span>{t(`quiz.${answer}`)}
               </button>
             ))}
@@ -189,7 +189,7 @@ export function FirstNeuronLesson() {
         <div className="code-editor">
           <div className="code-toolbar"><strong>🐍 neuron.py</strong><div><button type="button" onClick={() => setRunOutput(null)}>↻ {t('code.reset')}</button><button type="button" className="run-button" onClick={() => setRunOutput(output)}>▷ {t('code.run')}</button></div></div>
           <ol className="code-lines">
-            {pythonLines.map((line, index) => <li key={`${index}-${line}`}><code>{line || ' '}</code></li>)}
+            {pythonLines.map(({ id, text }) => <li key={id}><code>{text || ' '}</code></li>)}
           </ol>
           <div className="terminal-output"><span>›</span>{runOutput === null ? t('code.ready') : `Output: ${runOutput}`}</div>
         </div>
@@ -215,14 +215,14 @@ export function FirstNeuronLesson() {
   );
 }
 
-function SliderRow({label, hint, min, max, value, onChange}: {label: string; hint: string; min: number; max: number; value: number; onChange: (value: number) => void;}) {
+function SliderRow({ label, hint, min, max, value, onChange }: { label: string; hint: string; min: number; max: number; value: number; onChange: (value: number) => void }) {
   return <label className="slider-row"><span><b>{label}</b> <small>({hint})</small></span><input type="range" min={min} max={max} step="1" value={value} onChange={(event) => onChange(Number(event.target.value))} /><output>{value}</output></label>;
 }
 
-function CalcRow({symbol, value, tone}: {symbol: string; value: string; tone: string;}) {
+function CalcRow({ symbol, value, tone }: { symbol: string; value: string; tone: string }) {
   return <div className="calc-row"><span className={`calc-symbol ${tone}`}>{symbol}</span><b>=</b><code>{value}</code></div>;
 }
 
-function BuildStep({label, state}: {label: string; state: 'progress' | 'next' | 'locked';}) {
+function BuildStep({ label, state }: { label: string; state: 'progress' | 'next' | 'locked' }) {
   return <div className={`build-step ${state}`}><span>{state === 'progress' ? '◔' : state === 'next' ? '○' : '⌑'}</span><div><strong>{label}</strong><small>{state === 'progress' ? 'In progress' : state === 'next' ? 'Next' : 'Locked'}</small></div></div>;
 }
