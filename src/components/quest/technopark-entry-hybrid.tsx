@@ -17,6 +17,7 @@ import styles from './technopark-entry-hybrid.module.css';
 
 const storageKey = 'ai-lab:quest:technopark-entry:v1';
 const sceneCount = 12;
+const stepNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 const deviceIds: DeviceId[] = ['calculator', 'chess', 'vacuum', 'voice', 'llm'];
 const deviceShort: Record<DeviceId, string> = {
   calculator: '123',
@@ -47,9 +48,10 @@ function Rail({scene}: {scene: number}) {
   return (
     <aside className={styles.rail} aria-label={`Шаг ${scene + 1} из ${sceneCount}`}>
       <span className={styles.chevron}>⌃</span>
-      {Array.from({length: sceneCount}, (_, i) => (
-        <span key={i + 1} className={`${styles.step} ${i === scene ? styles.stepActive : ''} ${i < scene ? styles.stepDone : ''}`}>{i + 1}</span>
-      ))}
+      {stepNumbers.map((step) => {
+        const index = step - 1;
+        return <span key={`step-${step}`} className={`${styles.step} ${index === scene ? styles.stepActive : ''} ${index < scene ? styles.stepDone : ''}`}>{step}</span>;
+      })}
       <span className={styles.chevron}>⌄</span>
     </aside>
   );
@@ -209,7 +211,7 @@ export function TechnoparkEntryHybrid({locale}: {locale: string}) {
   } else if (scene === 6) {
     const correct = patternAnswer.trim() === copy.pattern.answer;
     disabled = !correct;
-    body = <SceneShell kicker={copy.pattern.eyebrow} title={copy.pattern.title} lead={copy.pattern.lead} visual={<PhotoStage scene={scene}><div className={styles.patternOverlay}><span>2 → 4</span><span>3 → 6</span><span>5 → 10</span><strong>8 → ?</strong></div></PhotoStage>}><div className={styles.patternInput}><label>{copy.pattern.question}</label><input inputMode="numeric" value={patternAnswer} onChange={(event) => setPatternAnswer(event.target.value)} placeholder="?" /></div>{patternAnswer && <Feedback good={correct} text={correct ? copy.pattern.good : copy.pattern.bad} />}</SceneShell>;
+    body = <SceneShell kicker={copy.pattern.eyebrow} title={copy.pattern.title} lead={copy.pattern.lead} visual={<PhotoStage scene={scene}><div className={styles.patternOverlay}><span>2 → 4</span><span>3 → 6</span><span>5 → 10</span><strong>8 → ?</strong></div></PhotoStage>}><div className={styles.patternInput}><label htmlFor="pattern-answer">{copy.pattern.question}</label><input id="pattern-answer" inputMode="numeric" value={patternAnswer} onChange={(event) => setPatternAnswer(event.target.value)} placeholder="?" /></div>{patternAnswer && <Feedback good={correct} text={correct ? copy.pattern.good : copy.pattern.bad} />}</SceneShell>;
   } else if (scene === 7) {
     disabled = contextAnswer !== 1;
     body = <SceneShell kicker={copy.context.eyebrow} title={copy.context.title} lead={copy.context.lead} visual={<PhotoStage scene={scene}><div className={styles.quoteOverlay}>{copy.context.phrases.map((phrase, i) => <blockquote key={phrase}><small>СЦЕНА {i + 1}</small>{phrase}</blockquote>)}</div></PhotoStage>}><Question question={copy.context.question} answers={copy.context.answers} selected={contextAnswer} correctIndex={1} good={copy.context.good} bad={copy.context.bad} onSelect={setContextAnswer} /></SceneShell>;
