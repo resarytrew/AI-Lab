@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import {useEffect, useState, type ReactNode} from 'react';
 import styles from './technopark-entry-quest.module.css';
+import archiveStyles from './data-archive-quest.module.css';
 import {getDataArchiveCopy} from '@/content/quests/data-archive-copy';
 import {
   DATA_ARCHIVE_SCENE_COUNT,
@@ -107,6 +108,90 @@ function ArchiveArt() {
   );
 }
 
+function FormatComparison({locale}: {locale: string}) {
+  const en = locale === 'en';
+  return (
+    <div className={archiveStyles.formatBoard}>
+      <article className={archiveStyles.formatCard}>
+        <header className={archiveStyles.formatHeader}>
+          <strong>{en ? 'Sensor log' : 'Журнал датчиков'}</strong>
+          <span>{en ? 'STRUCTURED' : 'СТРУКТУРА'}</span>
+        </header>
+        <div className={archiveStyles.tablePreview}>
+          <div className={archiveStyles.tableRow}><span>{en ? 'time' : 'время'}</span><span>{en ? 'room' : 'кабинет'}</span><span>{en ? 'temp.' : 'темп.'}</span></div>
+          <div className={archiveStyles.tableRow}><span>10:15</span><span>214</span><span>36.9</span></div>
+          <div className={archiveStyles.tableRow}><span>10:16</span><span>214</span><span>37.1</span></div>
+          <div className={archiveStyles.tableRow}><span>10:17</span><span>215</span><span>36.7</span></div>
+        </div>
+        <p className={archiveStyles.cardCaption}>{en ? 'Each value has a known place and field meaning.' : 'У каждого значения есть заранее понятное место и смысл поля.'}</p>
+        <div className={archiveStyles.formatFoot}><b>1</b><span>{en ? 'A machine can address a specific field directly.' : 'Машина может обратиться к нужному полю напрямую.'}</span></div>
+      </article>
+
+      <article className={archiveStyles.formatCard}>
+        <header className={archiveStyles.formatHeader}>
+          <strong>{en ? 'Media archive' : 'Медиатека'}</strong>
+          <span>{en ? 'NO TABLE SCHEMA' : 'БЕЗ ТАБЛИЦЫ'}</span>
+        </header>
+        <div className={archiveStyles.mediaShelf} aria-hidden="true">
+          <div className={archiveStyles.photoTile} />
+          <div className={archiveStyles.audioTile}><i /><i /><i /><i /><i /><i /></div>
+          <div className={archiveStyles.textTile}><i /><i /><i /></div>
+        </div>
+        <p className={archiveStyles.cardCaption}>{en ? 'Images, audio and free text do not share one ready-made set of columns.' : 'Фото, звук и свободный текст не имеют одной готовой схемы колонок.'}</p>
+        <div className={archiveStyles.formatFoot}><b>2</b><span>{en ? 'They need another representation before computation.' : 'Перед вычислениями им понадобится другое представление.'}</span></div>
+      </article>
+    </div>
+  );
+}
+
+function JournalArt({locale}: {locale: string}) {
+  const en = locale === 'en';
+  return (
+    <div className={archiveStyles.journalArt} aria-hidden="true">
+      <div className={archiveStyles.archiveCabinet}><span /></div>
+      <div className={archiveStyles.notebookIllustration} />
+      <div className={archiveStyles.pencil} />
+      <div className={archiveStyles.guideNote}>
+        <b>{en ? 'Archive curator' : 'Куратор Архива'}</b>
+        {en
+          ? 'Do not repeat the definition. Take one real situation and show how meaning appears step by step.'
+          : 'Не повторяй определение. Возьми одну реальную ситуацию и покажи, как смысл появляется шаг за шагом.'}
+      </div>
+    </div>
+  );
+}
+
+function JournalEditor({locale, value, onChange, prompt, placeholder, hint}: {
+  locale: string;
+  value: string;
+  onChange: (value: string) => void;
+  prompt: string;
+  placeholder: string;
+  hint: string;
+}) {
+  const en = locale === 'en';
+  return (
+    <div className={archiveStyles.journalCard}>
+      <div className={archiveStyles.journalGuide}>
+        <div><small>01 · {en ? 'DATA' : 'ДАННЫЕ'}</small><b>{en ? 'What was actually recorded?' : 'Что именно зафиксировали?'}</b></div>
+        <div><small>02 · {en ? 'INFORMATION' : 'ИНФОРМАЦИЯ'}</small><b>{en ? 'What context gave it meaning?' : 'Какой контекст дал смысл?'}</b></div>
+        <div><small>03 · {en ? 'KNOWLEDGE' : 'ЗНАНИЕ'}</small><b>{en ? 'What reusable conclusion appeared?' : 'Какой вывод можно применить снова?'}</b></div>
+      </div>
+      <div className={archiveStyles.journalInputWrap}>
+        <label htmlFor="archive-journal">{prompt}</label>
+        <textarea
+          id="archive-journal"
+          maxLength={600}
+          value={value}
+          placeholder={placeholder}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <div className={archiveStyles.journalMeta}><span>{hint}</span><b>{value.length}/600</b></div>
+      </div>
+    </div>
+  );
+}
+
 export function DataArchiveQuest({locale}: {locale: string}) {
   const copy = getDataArchiveCopy(locale);
   const [progress, setProgress] = useState<DataArchiveProgress>(initialDataArchiveProgress);
@@ -153,7 +238,7 @@ export function DataArchiveQuest({locale}: {locale: string}) {
   } else if (scene === 4) {
     body = questionScene(copy.knowledge, 1, <div className={styles.contextBoard}><blockquote><small>Факт</small><p>12:41 · 38 человек</p></blockquote><blockquote><small>Закономерность</small><p>После 12:30 очередь обычно растёт</p></blockquote></div>);
   } else if (scene === 5) {
-    body = questionScene(copy.structure, 0, <div className={styles.thermostatBoard}><article><b>TABLE</b><div className={styles.thermostatDial}>|||</div><p>строки · колонки · поля</p></article><article><b>MEDIA</b><div className={styles.thermostatDial}>•••</div><p>текст · фото · звук</p></article></div>);
+    body = questionScene(copy.structure, 0, <FormatComparison locale={locale} />);
   } else if (scene === 6) {
     body = questionScene(copy.quality, 0, <div className={styles.rulesBoard}><div><b>✓</b><code>кот → «кот»</code></div><div><b>?</b><code>собака → «кот»</code></div><div><b>—</b><code>фото → без подписи</code></div><div><b>×2</b><code>дубликат записи</code></div></div>);
   } else if (scene === 7) {
@@ -165,7 +250,18 @@ export function DataArchiveQuest({locale}: {locale: string}) {
   } else if (scene === 10) {
     disabled = progress.journal.trim().length < 24;
     label = locale === 'en' ? 'Save entry' : 'Сохранить запись';
-    body = <Scene kicker={copy.journal.kicker} title={copy.journal.title} lead={copy.journal.lead} visual={<div className={styles.journalPanel}><label htmlFor="archive-journal">{copy.journal.prompt}</label><textarea id="archive-journal" maxLength={600} value={progress.journal} placeholder={copy.journal.placeholder} onChange={(event) => setProgress((current) => ({...current, journal: event.target.value}))} /><div><span>{copy.journal.hint}</span><b>{progress.journal.length}/600</b></div></div>} />;
+    body = (
+      <Scene kicker={copy.journal.kicker} title={copy.journal.title} lead={copy.journal.lead} visual={<JournalArt locale={locale} />}>
+        <JournalEditor
+          locale={locale}
+          value={progress.journal}
+          prompt={copy.journal.prompt}
+          placeholder={copy.journal.placeholder}
+          hint={copy.journal.hint}
+          onChange={(journal) => setProgress((current) => ({...current, journal}))}
+        />
+      </Scene>
+    );
   } else {
     label = locale === 'en' ? 'Back to the Technopark' : 'Вернуться в Технопарк';
     body = <Scene kicker={copy.unlock.kicker} title={copy.unlock.title} lead={copy.unlock.lead} visual={<div className={styles.unlockBoard}><div className={styles.unlockSeal}>02</div><article><small>Журнал</small><b>{copy.unlock.journal}</b><p>«{progress.journal}»</p></article><article><small>Project M-01</small><b>{copy.unlock.project}</b><p>{copy.unlock.status}</p></article><article><small>Дальше</small><b>{copy.unlock.nextLab}</b><p>{locale === 'en' ? 'Data → information → knowledge unlocked' : 'Данные → информация → знания открыты'}</p></article></div>}><div className={styles.passBadge}>{copy.unlock.badge}</div></Scene>;
