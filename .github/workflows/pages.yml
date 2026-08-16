@@ -47,7 +47,7 @@ jobs:
           DEPLOY_TARGET: github-pages
         run: npm run build
 
-      - name: Add default Russian Technopark entry point
+      - name: Add default Russian beginner journey entry point
         run: |
           cat > out/index.html <<'HTML'
           <!doctype html>
@@ -56,14 +56,14 @@ jobs:
               <meta charset="utf-8" />
               <meta name="viewport" content="width=device-width, initial-scale=1" />
               <meta name="robots" content="noindex" />
-              <meta http-equiv="refresh" content="0; url=./ru/technopark/entry/" />
-              <title>AI Lab · Технопарк</title>
+              <meta http-equiv="refresh" content="0; url=./ru/journey/human-knows-rule/" />
+              <title>AI Lab · От нуля до MyGPT</title>
               <script>
-                window.location.replace('./ru/technopark/entry/');
+                window.location.replace('./ru/journey/human-knows-rule/');
               </script>
             </head>
             <body>
-              <p><a href="./ru/technopark/entry/">Войти в Технопарк AI Lab</a></p>
+              <p><a href="./ru/journey/human-knows-rule/">Начать AI Lab с нуля</a></p>
             </body>
           </html>
           HTML
