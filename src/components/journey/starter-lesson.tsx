@@ -10,6 +10,7 @@ import {
   type StarterLessonId,
 } from '@/content/learning-path';
 import {getLessonTheory} from '@/content/lesson-theory';
+import theoryStyles from './lesson-theory.module.css';
 import {StarterLessonLab} from './starter-labs';
 import styles from './starter-lesson.module.css';
 
@@ -38,17 +39,17 @@ function TheoryLayer({lessonId, locale}: {lessonId: StarterLessonId; locale: str
   const theory = getLessonTheory(lessonId);
 
   return (
-    <section className={styles.theorySection}>
-      <div className={styles.theoryHeading}>
-        <p className={styles.theoryEyebrow}>{tr(locale, 'ТЕОРИЯ · после открытия', 'THEORY · after discovery')}</p>
+    <section className={theoryStyles.theorySection}>
+      <div className={theoryStyles.theoryHeading}>
+        <p className={theoryStyles.theoryEyebrow}>{tr(locale, 'ТЕОРИЯ · после открытия', 'THEORY · after discovery')}</p>
         <h2>{tr(locale, 'Теперь разберёмся, почему это работает', 'Now let’s understand why it works')}</h2>
         <p>{localize(theory.intro, locale)}</p>
       </div>
 
-      <div className={styles.theoryBody}>
-        <div className={styles.theoryChapters}>
+      <div className={theoryStyles.theoryBody}>
+        <div className={theoryStyles.theoryChapters}>
           {theory.sections.map((section, index) => (
-            <article className={styles.theoryChapter} key={`${lessonId}-theory-${index + 1}`}>
+            <article className={theoryStyles.theoryChapter} key={`${lessonId}-theory-${index + 1}`}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <div>
                 <h3>{localize(section.title, locale)}</h3>
@@ -58,8 +59,8 @@ function TheoryLayer({lessonId, locale}: {lessonId: StarterLessonId; locale: str
           ))}
         </div>
 
-        <aside className={styles.theorySidebar}>
-          <div className={styles.glossaryCard}>
+        <aside className={theoryStyles.theorySidebar}>
+          <div className={theoryStyles.glossaryCard}>
             <small>{tr(locale, 'СЛОВАРЬ', 'GLOSSARY')}</small>
             {theory.terms.map(({term, definition}) => (
               <div key={localize(term, locale)}>
@@ -69,19 +70,19 @@ function TheoryLayer({lessonId, locale}: {lessonId: StarterLessonId; locale: str
             ))}
           </div>
 
-          <div className={styles.theoryExample}>
+          <div className={theoryStyles.theoryExample}>
             <small>{tr(locale, 'ПРИМЕР', 'EXAMPLE')}</small>
             <p>{localize(theory.example, locale)}</p>
           </div>
         </aside>
       </div>
 
-      <div className={styles.theoryChecks}>
-        <article className={styles.misconceptionCard}>
+      <div className={theoryStyles.theoryChecks}>
+        <article className={theoryStyles.misconceptionCard}>
           <small>{tr(locale, 'НЕ ПЕРЕПУТАЙ', 'COMMON MISCONCEPTION')}</small>
           <p>{localize(theory.misconception, locale)}</p>
         </article>
-        <article className={styles.takeawayCard}>
+        <article className={theoryStyles.takeawayCard}>
           <small>{tr(locale, 'ГЛАВНАЯ МЫСЛЬ', 'KEY TAKEAWAY')}</small>
           <p>{localize(theory.takeaway, locale)}</p>
         </article>
@@ -172,7 +173,7 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
           </div>
 
           {isComplete && (
-            <div className={styles.discoveryNext}>
+            <div className={theoryStyles.discoveryNext}>
               <span>{tr(locale, 'Открытие сделано', 'Discovery complete')}</span>
               <b>↓</b>
               <p>{tr(locale, 'Теперь не угадываем дальше — разбираем механизм и фиксируем теорию.', 'Now we stop guessing and explain the mechanism in full.')}</p>
@@ -185,7 +186,7 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
         <>
           <TheoryLayer lessonId={lesson.id} locale={locale} />
 
-          <section className={styles.afterTheory}>
+          <section className={theoryStyles.afterTheory}>
             <div className={styles.checkpointCard}>
               <small>{tr(locale, 'TRANSFER · новая ситуация', 'TRANSFER · new situation')}</small>
               <p>{localize(lesson.checkpoint, locale)}</p>
