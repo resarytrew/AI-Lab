@@ -10,6 +10,7 @@ import {
   type StarterLessonId,
 } from '@/content/learning-path';
 import {getLessonTheory} from '@/content/lesson-theory';
+import {ChapterExperience} from './chapter-experience';
 import theoryStyles from './lesson-theory.module.css';
 import {StarterLessonLab} from './starter-labs';
 import styles from './starter-lesson.module.css';
@@ -87,6 +88,8 @@ function TheoryLayer({lessonId, locale}: {lessonId: StarterLessonId; locale: str
           <p>{localize(theory.takeaway, locale)}</p>
         </article>
       </div>
+
+      <ChapterExperience lessonId={lessonId} locale={locale} />
     </section>
   );
 }
@@ -176,7 +179,7 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
             <div className={theoryStyles.discoveryNext}>
               <span>{tr(locale, 'Открытие сделано', 'Discovery complete')}</span>
               <b>↓</b>
-              <p>{tr(locale, 'Теперь не угадываем дальше — разбираем механизм и фиксируем теорию.', 'Now we stop guessing and explain the mechanism in full.')}</p>
+              <p>{tr(locale, 'Теперь не угадываем дальше — разбираем теорию, механизм, математику, код и эксперимент.', 'Now we stop guessing and unpack the theory, mechanism, math, code, and experiment.')}</p>
             </div>
           )}
         </div>
@@ -190,21 +193,6 @@ export function StarterLessonPage({locale, lessonSlug}: {locale: string; lessonS
             <div className={styles.checkpointCard}>
               <small>{tr(locale, 'TRANSFER · новая ситуация', 'TRANSFER · new situation')}</small>
               <p>{localize(lesson.checkpoint, locale)}</p>
-            </div>
-
-            <div className={styles.depthStack}>
-              <details>
-                <summary>{tr(locale, 'Открой капот · математика и механизм', 'Open the hood · math and mechanism')}</summary>
-                <p>{localize(lesson.deepDive, locale)}</p>
-              </details>
-              <details>
-                <summary>Engineer · Code</summary>
-                <p>{localize(lesson.engineer, locale)}</p>
-              </details>
-              <details>
-                <summary>Researcher · Experiment</summary>
-                <p>{localize(lesson.researcher, locale)}</p>
-              </details>
             </div>
           </section>
         </>
