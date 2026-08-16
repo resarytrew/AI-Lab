@@ -45,7 +45,6 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
   const [runtimeState, setRuntimeState] = useState<PythonRuntimeState>('idle');
   const [pythonVersion, setPythonVersion] = useState('');
   const [runResult, setRunResult] = useState<PythonRunResult | null>(null);
-  const [runtimeNonce, setRuntimeNonce] = useState(0);
   const runtimeRef = useRef<PythonLabClient | null>(null);
 
   useEffect(() => {
@@ -55,7 +54,14 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
   }, [content.engineer.starterCode]);
 
   useEffect(() => {
-    if (mode !== 'engineer' || runtimeRef.current || typeof window === 'undefined') return;
+    if (
+      mode !== 'engineer' ||
+      runtimeState !== 'idle' ||
+      runtimeRef.current ||
+      typeof window === 'undefined'
+    ) {
+      return;
+    }
 
     const client = new PythonLabClient(resolvePythonWorkerUrl(window.location));
     runtimeRef.current = client;
@@ -84,7 +90,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
           durationMs: 0,
         });
       });
-  }, [mode, runtimeNonce]);
+  }, [mode, runtimeState]);
 
   useEffect(
     () => () => {
@@ -141,10 +147,9 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
   function retryRuntime() {
     runtimeRef.current?.terminate();
     runtimeRef.current = null;
-    setRuntimeState('idle');
     setRunResult(null);
     setPythonVersion('');
-    setRuntimeNonce((value) => value + 1);
+    setRuntimeState('idle');
   }
 
   return (
