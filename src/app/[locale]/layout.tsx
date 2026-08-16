@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: 'Интерактивный курс: от первого нейрона до собственной языковой модели.'
 };
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
 }
