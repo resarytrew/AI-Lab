@@ -21,6 +21,10 @@ export function LessonCodePanel({
   helper?: string;
 }) {
   const t = useTranslations();
+  const keyedLines = lines.map((text, position) => ({
+    id: `code-line-${position + 1}`,
+    text,
+  }));
 
   return (
     <aside className="code-column" id="code">
@@ -37,9 +41,9 @@ export function LessonCodePanel({
           </div>
         </div>
         <ol className="code-lines">
-          {lines.map((line, index) => (
-            <li key={`${index}-${line}`}>
-              <code>{line || ' '}</code>
+          {keyedLines.map((line) => (
+            <li key={line.id}>
+              <code>{line.text || ' '}</code>
             </li>
           ))}
         </ol>
