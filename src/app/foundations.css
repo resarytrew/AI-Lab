@@ -3,26 +3,6 @@
     text-decoration: none;
   }
 
-  .build-step.complete {
-    border-color: #b9d8b4;
-    background: var(--green-soft);
-  }
-
-  .build-step.complete > span,
-  .build-step.complete small {
-    color: var(--green);
-  }
-
-  .build-step.inProgress {
-    border-color: #e9b6b0;
-    background: var(--red-soft);
-  }
-
-  .build-step.inProgress > span,
-  .build-step.inProgress small {
-    color: var(--red);
-  }
-
   .code-actions .code-next-link {
     height: 46px;
     display: flex;
@@ -257,6 +237,26 @@
 
   .function-playground-bottom {
     margin-top: 2px;
+  }
+
+  .build-step.complete {
+    border-color: #b9d8b4;
+    background: var(--green-soft);
+  }
+
+  .build-step.complete > span,
+  .build-step.complete small {
+    color: var(--green);
+  }
+
+  .build-step.inProgress {
+    border-color: #e9b6b0;
+    background: var(--red-soft);
+  }
+
+  .build-step.inProgress > span,
+  .build-step.inProgress small {
+    color: var(--red);
   }
 
   @media (max-width: 1100px) {
