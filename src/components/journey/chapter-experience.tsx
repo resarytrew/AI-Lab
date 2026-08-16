@@ -1,9 +1,16 @@
 'use client';
 
 import Editor from '@monaco-editor/react';
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {getChapterContent} from '@/content/chapter-content';
 import {localize, type StarterLessonId} from '@/content/learning-path';
+import {
+  buildReferenceSource,
+  PythonLabClient,
+  type PythonRunResult,
+  type PythonRuntimeState,
+  resolvePythonWorkerUrl,
+} from '@/lib/python-lab';
 import chapterStyles from './chapter-experience.module.css';
 import monacoStyles from './monaco-python-editor.module.css';
 
@@ -13,11 +20,16 @@ function tr(locale: string, ru: string, en: string) {
   return locale === 'en' ? en : ru;
 }
 
-function normalizeCode(value: string) {
-  return value
-    .replace(/[`'";]/g, '')
-    .replace(/\s+/g, '')
-    .toLowerCase();
+function runtimeLabel(locale: string, state: PythonRuntimeState) {
+  const labels: Record<PythonRuntimeState, [string, string]> = {
+    idle: ['Python не запущен', 'Python is idle'],
+    loading: ['Загружаем Python…', 'Loading Python…'],
+    ready: ['Python готов', 'Python ready'],
+    running: ['Выполняем код…', 'Running code…'],
+    error: ['Runtime остановлен', 'Runtime stopped'],
+  };
+  const [ru, en] = labels[state];
+  return tr(locale, ru, en);
 }
 
 export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId; locale: string}) {
@@ -27,26 +39,118 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
   const [mode, setMode] = useState<DepthMode>('math');
   const [mathVisible, setMathVisible] = useState(1);
   const [editorCode, setEditorCode] = useState(content.engineer.starterCode);
-  const [codeChecked, setCodeChecked] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [hypothesis, setHypothesis] = useState<number | null>(null);
   const [experimentRan, setExperimentRan] = useState(false);
+  const [runtimeState, setRuntimeState] = useState<PythonRuntimeState>('idle');
+  const [pythonVersion, setPythonVersion] = useState('');
+  const [runResult, setRunResult] = useState<PythonRunResult | null>(null);
+  const runtimeRef = useRef<PythonLabClient | null>(null);
 
   useEffect(() => {
     setEditorCode(content.engineer.starterCode);
-    setCodeChecked(false);
     setShowSolution(false);
+    setRunResult(null);
   }, [content.engineer.starterCode]);
 
-  const codeCorrect = useMemo(() => {
-    if (!codeChecked) return false;
-    const source = normalizeCode(editorCode);
-    const expected = normalizeCode(content.engineer.expected);
-    const solution = normalizeCode(content.engineer.solution);
-    return source.includes(expected) || source.includes(solution);
-  }, [editorCode, codeChecked, content.engineer.expected, content.engineer.solution]);
+  useEffect(() => {
+    if (
+      mode !== 'engineer' ||
+      runtimeState !== 'idle' ||
+      runtimeRef.current ||
+      typeof window === 'undefined'
+    ) {
+      return;
+    }
+
+    const client = new PythonLabClient(resolvePythonWorkerUrl(window.location));
+    runtimeRef.current = client;
+    setRuntimeState('loading');
+    setRunResult(null);
+
+    client
+      .init()
+      .then((response) => {
+        if (runtimeRef.current !== client) return;
+        setPythonVersion(response.pythonVersion ?? '');
+        setRuntimeState('ready');
+      })
+      .catch((error: unknown) => {
+        if (runtimeRef.current !== client) return;
+        client.terminate();
+        runtimeRef.current = null;
+        setRuntimeState('error');
+        setRunResult({
+          ok: false,
+          stdout: '',
+          stderr: '',
+          result: '',
+          tests: [],
+          traceback: error instanceof Error ? error.message : String(error),
+          durationMs: 0,
+        });
+      });
+  }, [mode, runtimeState]);
+
+  useEffect(
+    () => () => {
+      runtimeRef.current?.terminate();
+      runtimeRef.current = null;
+    },
+    [],
+  );
 
   const activeVisual = content.visualNodes[visualIndex];
+  const runtimeBusy = runtimeState === 'loading' || runtimeState === 'running';
+
+  async function executePython(withTests: boolean) {
+    const client = runtimeRef.current;
+    if (!client || runtimeState !== 'ready') return;
+
+    setRuntimeState('running');
+    setRunResult(null);
+
+    try {
+      const response = withTests
+        ? await client.test(
+            editorCode,
+            buildReferenceSource(content.engineer.starterCode, content.engineer.expected),
+          )
+        : await client.run(editorCode);
+      setRunResult(response);
+      setRuntimeState('ready');
+    } catch (error) {
+      client.terminate();
+      runtimeRef.current = null;
+      const timedOut = error instanceof Error && error.message === 'PYTHON_TIMEOUT';
+      setRunResult({
+        ok: false,
+        stdout: '',
+        stderr: '',
+        result: '',
+        tests: [],
+        traceback: timedOut
+          ? tr(
+              locale,
+              'Выполнение остановлено: программа работала слишком долго. Runtime перезапущен, чтобы бесконечный цикл не зависил страницу.',
+              'Execution stopped: the program ran for too long. The runtime was reset so an infinite loop cannot freeze the page.',
+            )
+          : error instanceof Error
+            ? error.message
+            : String(error),
+        durationMs: 0,
+      });
+      setRuntimeState('error');
+    }
+  }
+
+  function retryRuntime() {
+    runtimeRef.current?.terminate();
+    runtimeRef.current = null;
+    setRunResult(null);
+    setPythonVersion('');
+    setRuntimeState('idle');
+  }
 
   return (
     <div className={chapterStyles.experience}>
@@ -103,7 +207,11 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
         </div>
 
         {workedVisible < content.workedSteps.length ? (
-          <button type="button" className={chapterStyles.revealButton} onClick={() => setWorkedVisible((value) => value + 1)}>
+          <button
+            type="button"
+            className={chapterStyles.revealButton}
+            onClick={() => setWorkedVisible((value) => value + 1)}
+          >
             {tr(locale, 'Показать следующий шаг', 'Reveal next step')} →
           </button>
         ) : (
@@ -175,22 +283,54 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
               <div className={chapterStyles.challengeCard}>
                 <small>{tr(locale, 'ТВОЯ ЗАДАЧА', 'YOUR TASK')}</small>
                 <p>{localize(content.engineer.challenge, locale)}</p>
-                <div className={monacoStyles.editorInstruction}>{tr(locale, 'Исправь код справа прямо в файле. Проверка читает содержимое Monaco Editor.', 'Edit the code directly in the file on the right. The check reads the Monaco Editor contents.')}</div>
+                <div className={monacoStyles.editorInstruction}>
+                  {tr(
+                    locale,
+                    'Исправь код справа. Теперь это настоящий Python: ▶ Запустить выполняет файл в браузере, а Проверить тестами сравнивает поведение твоей программы с эталоном.',
+                    'Edit the code on the right. This is now real Python: ▶ Run executes the file in your browser, while Check tests compares your program behavior with the reference.',
+                  )}
+                </div>
+
+                <div className={monacoStyles.runtimeLine}>
+                  <span className={monacoStyles.runtimeDot} data-state={runtimeState} />
+                  <b>{runtimeLabel(locale, runtimeState)}</b>
+                  {pythonVersion && <code>Python {pythonVersion} · Pyodide</code>}
+                </div>
+
                 <div className={chapterStyles.challengeActions}>
-                  <button type="button" onClick={() => setCodeChecked(true)}>{tr(locale, 'Проверить код', 'Check code')}</button>
+                  <button type="button" disabled={runtimeBusy || runtimeState !== 'ready'} onClick={() => void executePython(false)}>
+                    ▶ {tr(locale, 'Запустить', 'Run')}
+                  </button>
+                  <button type="button" disabled={runtimeBusy || runtimeState !== 'ready'} onClick={() => void executePython(true)}>
+                    ✓ {tr(locale, 'Проверить тестами', 'Check tests')}
+                  </button>
                   <button
                     type="button"
                     className={chapterStyles.textButton}
                     onClick={() => {
                       setEditorCode(content.engineer.starterCode);
-                      setCodeChecked(false);
+                      setRunResult(null);
                     }}
                   >
-                    {tr(locale, 'Сбросить', 'Reset')}
+                    {tr(locale, 'Сбросить код', 'Reset code')}
                   </button>
-                  <button type="button" className={chapterStyles.textButton} onClick={() => setShowSolution((value) => !value)}>{showSolution ? tr(locale, 'Скрыть решение', 'Hide solution') : tr(locale, 'Показать решение', 'Show solution')}</button>
+                  {runtimeState === 'error' && (
+                    <button type="button" className={chapterStyles.textButton} onClick={retryRuntime}>
+                      {tr(locale, 'Перезапустить Python', 'Restart Python')}
+                    </button>
+                  )}
+                  <button type="button" className={chapterStyles.textButton} onClick={() => setShowSolution((value) => !value)}>
+                    {showSolution ? tr(locale, 'Скрыть решение', 'Hide solution') : tr(locale, 'Показать решение', 'Show solution')}
+                  </button>
                 </div>
-                {codeChecked && <div className={codeCorrect ? chapterStyles.correct : chapterStyles.incorrect}>{codeCorrect ? tr(locale, '✓ Рабочий вариант. Объясни теперь каждую часть строки.', '✓ Working answer. Now explain every part of the line.') : localize(content.engineer.hint, locale)}</div>}
+
+                {runResult?.tests.length ? (
+                  <div className={runResult.testsPassed ? chapterStyles.correct : chapterStyles.incorrect}>
+                    {runResult.testsPassed
+                      ? tr(locale, '✓ Все runtime-тесты прошли. Теперь объясни, почему код работает.', '✓ All runtime tests passed. Now explain why the code works.')
+                      : tr(locale, 'Не все тесты прошли. Посмотри результаты в консоли и исправь программу.', 'Some tests failed. Inspect the console results and fix the program.')}
+                  </div>
+                ) : null}
                 {showSolution && <code className={chapterStyles.solution}>{content.engineer.solution}</code>}
               </div>
             </div>
@@ -209,7 +349,7 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                   value={editorCode}
                   onChange={(value) => {
                     setEditorCode(value ?? '');
-                    setCodeChecked(false);
+                    setRunResult(null);
                   }}
                   loading={<div className={monacoStyles.editorLoading}>{tr(locale, 'Загружаем Monaco Editor…', 'Loading Monaco Editor…')}</div>}
                   options={{
@@ -234,11 +374,63 @@ export function ChapterExperience({lessonId, locale}: {lessonId: StarterLessonId
                   }}
                 />
               </section>
+
+              <section className={monacoStyles.consolePanel} aria-live="polite">
+                <div className={monacoStyles.consoleHeader}>
+                  <b>{tr(locale, 'КОНСОЛЬ', 'CONSOLE')}</b>
+                  {runResult && <span>{runResult.durationMs} ms</span>}
+                </div>
+
+                {!runResult && (
+                  <p className={monacoStyles.consoleEmpty}>
+                    {runtimeState === 'loading'
+                      ? tr(locale, 'Первый запуск загружает Python/WebAssembly. Следующие запуски будут быстрее.', 'The first run loads Python/WebAssembly. Later runs will be faster.')
+                      : tr(locale, 'Нажми ▶ Запустить, чтобы увидеть stdout, результат или traceback.', 'Press ▶ Run to see stdout, a result, or a traceback.')}
+                  </p>
+                )}
+
+                {runResult?.stdout && (
+                  <div className={monacoStyles.outputBlock}>
+                    <small>STDOUT</small>
+                    <pre>{runResult.stdout}</pre>
+                  </div>
+                )}
+                {runResult?.result && (
+                  <div className={monacoStyles.outputBlock}>
+                    <small>RESULT</small>
+                    <pre>{runResult.result}</pre>
+                  </div>
+                )}
+                {runResult?.stderr && (
+                  <div className={monacoStyles.errorBlock}>
+                    <small>STDERR</small>
+                    <pre>{runResult.stderr}</pre>
+                  </div>
+                )}
+                {runResult?.traceback && (
+                  <div className={monacoStyles.errorBlock}>
+                    <small>TRACEBACK</small>
+                    <pre>{runResult.traceback}</pre>
+                  </div>
+                )}
+                {runResult?.tests.length ? (
+                  <div className={monacoStyles.testSuite}>
+                    <small>UNIT TESTS</small>
+                    {runResult.tests.map((test) => (
+                      <div key={`${lessonId}-${test.name}`} data-passed={test.passed}>
+                        <span>{test.passed ? '✓' : '×'}</span>
+                        <div><b>{test.name}</b><p>{test.detail}</p></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+
               <footer className={monacoStyles.editorStatus}>
                 <span>Python</span>
                 <span>UTF-8</span>
                 <span>Spaces: 4</span>
-                <span>Monaco Editor</span>
+                <span>Monaco + Pyodide Worker</span>
               </footer>
             </div>
           </div>

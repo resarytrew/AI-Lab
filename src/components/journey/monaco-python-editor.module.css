@@ -19,6 +19,52 @@
   text-transform: uppercase;
 }
 
+.runtimeLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: #5b544c;
+  font-size: 11px;
+}
+
+.runtimeLine b {
+  font-size: 11px;
+}
+
+.runtimeLine code {
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #eee9e1;
+  color: #665f57;
+  font: 700 9px 'SFMono-Regular', Consolas, monospace;
+}
+
+.runtimeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a49d94;
+  box-shadow: 0 0 0 4px rgba(164,157,148,.12);
+}
+
+.runtimeDot[data-state='loading'],
+.runtimeDot[data-state='running'] {
+  background: #d9a300;
+  box-shadow: 0 0 0 4px rgba(217,163,0,.13);
+}
+
+.runtimeDot[data-state='ready'] {
+  background: #4c8b55;
+  box-shadow: 0 0 0 4px rgba(76,139,85,.13);
+}
+
+.runtimeDot[data-state='error'] {
+  background: #bd4b32;
+  box-shadow: 0 0 0 4px rgba(189,75,50,.13);
+}
+
 .editorFrame {
   height: clamp(340px, 42vw, 520px);
   margin-top: 16px;
@@ -37,6 +83,123 @@
   background: #1e1e1e;
   font: 700 11px 'SFMono-Regular', Consolas, monospace;
   letter-spacing: .04em;
+}
+
+.consolePanel {
+  min-height: 122px;
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  background: #0b0b0a;
+  color: #d9d4cd;
+}
+
+.consoleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 0 13px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  color: #8f8981;
+  font: 800 9px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: .1em;
+}
+
+.consoleHeader span {
+  color: #615d58;
+  letter-spacing: 0;
+}
+
+.consoleEmpty {
+  margin: 0;
+  padding: 18px;
+  color: #77716b;
+  font: 500 11px/1.6 'SFMono-Regular', Consolas, monospace;
+}
+
+.outputBlock,
+.errorBlock,
+.testSuite {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.outputBlock:last-child,
+.errorBlock:last-child,
+.testSuite:last-child {
+  border-bottom: 0;
+}
+
+.outputBlock small,
+.errorBlock small,
+.testSuite > small {
+  color: #6e6963;
+  font: 800 8px 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: .12em;
+}
+
+.outputBlock pre,
+.errorBlock pre {
+  margin: 8px 0 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #e5dfd7;
+  font: 500 11px/1.6 'SFMono-Regular', Consolas, monospace;
+}
+
+.errorBlock {
+  background: #180f0d;
+}
+
+.errorBlock pre {
+  color: #f1a28e;
+}
+
+.testSuite {
+  display: grid;
+  gap: 8px;
+}
+
+.testSuite > div {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 9px;
+  background: #11110f;
+}
+
+.testSuite > div > span {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #40211b;
+  color: #e88368;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.testSuite > div[data-passed='true'] > span {
+  background: #19301d;
+  color: #7fc087;
+}
+
+.testSuite b {
+  color: #d9d4cd;
+  font: 700 10px 'SFMono-Regular', Consolas, monospace;
+}
+
+.testSuite p {
+  margin: 4px 0 0;
+  color: #77716b;
+  font: 500 9px/1.5 'SFMono-Regular', Consolas, monospace;
 }
 
 .editorStatus {
