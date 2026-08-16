@@ -10,7 +10,7 @@ const pyodideReady = loadPyodide({
   stderr: (line) => activeOutput?.stderr.push(String(line)),
 });
 
-const TEST_HARNESS = String.raw`
+const TEST_HARNESS = `
 import copy as _copy
 import inspect as _inspect
 import io as _io
@@ -53,8 +53,6 @@ def _candidate_values(name, reference_namespace):
         return [_copy.deepcopy(reference_namespace[name])]
 
     lowered = name.lower()
-    if any(token in lowered for token in ('text', 'word', 'token', 'char', 'string', 's')):
-        return ['abc', 'abba', 'hello world']
     if any(token in lowered for token in ('record', 'criteria', 'mapping', 'dict', 'vocab', 'stoi')):
         return [
             {'a': True, 'b': False},
@@ -62,6 +60,8 @@ def _candidate_values(name, reference_namespace):
         ]
     if any(token in lowered for token in ('values', 'items', 'data', 'errors', 'probs', 'counts', 'xs')):
         return [[1, 2, 3], [0.2, 0.3, 0.5], [True, False, True]]
+    if lowered == 's' or any(token in lowered for token in ('text', 'word', 'token', 'char', 'string')):
+        return ['abc', 'abba', 'hello world']
     return [0, 1, 2, -1, 0.5]
 
 
